@@ -11,7 +11,7 @@ function Login() {
   }
 
   const handleLogin = () => {
-    nav('/dashboard');
+    nav('/clients');
   }
 
   return (

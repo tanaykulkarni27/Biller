@@ -1,7 +1,10 @@
 import './App.css'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './login/page'
-import Dashboard from './dashboard/page'
+import Clients from './clients/page'
+// Single Client Handling 
+import DashboardLayout from './dashboard/layout'
+import Billing from './dashboard/Billing'
 function App() {
 
   return (
@@ -10,7 +13,12 @@ function App() {
 
         {/* Public routes */}
         <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/clients" element={<Clients />} />
+        <Route path="/dashboard/:client_name" element={<DashboardLayout />} >
+          <Route index element={<Navigate to="billing" replace />} />
+          <Route path="billing" element={<Billing />} />
+          {/* <Route path="details" element={<ViewDetails />} /> */}
+        </Route>
       
         {/* <Route path="*" element={<NotFound />} /> */}
 
