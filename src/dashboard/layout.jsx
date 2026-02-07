@@ -45,7 +45,7 @@ export default function DashboardLayout() {
           </NavLink>
 
           <NavLink
-            to="details"
+            to="addBill"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               `px-4 py-2 rounded-lg font-medium transition
@@ -54,7 +54,7 @@ export default function DashboardLayout() {
                 : 'text-gray-600 hover:bg-gray-100'}`
             }
           >
-            View Client
+            Add Bill
           </NavLink>
         </nav>
       </aside>

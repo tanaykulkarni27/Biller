@@ -5,6 +5,7 @@ import Clients from './clients/page'
 // Single Client Handling 
 import DashboardLayout from './dashboard/layout'
 import Billing from './dashboard/Billing'
+import AddBill from './dashboard/AddBill'
 function App() {
 
   return (
@@ -17,7 +18,7 @@ function App() {
         <Route path="/dashboard/:client_name" element={<DashboardLayout />} >
           <Route index element={<Navigate to="billing" replace />} />
           <Route path="billing" element={<Billing />} />
-          {/* <Route path="details" element={<ViewDetails />} /> */}
+          <Route path="addBill" element={<AddBill />} />
         </Route>
       
         {/* <Route path="*" element={<NotFound />} /> */}

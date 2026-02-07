@@ -24,7 +24,7 @@ export default function Billing() {
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         
         {/* 👇 Scroll container */}
-        <div className="overflow-x-auto">
+        <div className="max-w-screen overflow-x-auto .no-scrollbar">
           <table className="w-full min-w-[640px] text-sm">
             <thead className="bg-gray-50 text-gray-600">
               <tr>
