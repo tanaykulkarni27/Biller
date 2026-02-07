@@ -1,0 +1,8 @@
+@import "tailwindcss";
+:root{
+    --primary-color: #7367f0;
+    --primary-color-light: #7367f0cc;
+}
+.bg-primary {
+  @apply bg-[#7367f0];
+}
