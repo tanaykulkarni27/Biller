@@ -6,6 +6,7 @@ import Clients from './clients/page'
 import DashboardLayout from './dashboard/layout'
 import Billing from './dashboard/Billing'
 import AddBill from './dashboard/AddBill'
+import Myacc from './dashboard/myacc'
 function App() {
 
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route index element={<Navigate to="billing" replace />} />
           <Route path="billing" element={<Billing />} />
           <Route path="addBill" element={<AddBill />} />
+          <Route path="myacc" element={<Myacc />} />
         </Route>
       
         {/* <Route path="*" element={<NotFound />} /> */}

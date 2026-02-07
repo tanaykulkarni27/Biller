@@ -1,9 +1,10 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useState } from "react";
+import {useParams} from 'react-router-dom';
 
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
-
+  const {client_name} = useParams();
   return (
     <div className="min-h-screen flex bg-gray-50">
 
@@ -27,10 +28,40 @@ export default function DashboardLayout() {
         `}
       >
         <h1 className="text-xl font-semibold text-[#7367f0] mb-8">
-          Client Panel
+          {/* {client_name} */}
+            Menu
         </h1>
 
         <nav className="flex flex-col gap-2">
+          
+          <NavLink
+            to="myacc"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              `px-4 py-2 rounded-lg font-medium transition
+              ${isActive
+                ? 'bg-[#7367f0]/10 text-[#7367f0]'
+                : 'text-gray-600 hover:bg-gray-100'}`
+            }
+          >
+            
+            My Account
+          </NavLink>
+
+          <NavLink
+            to="/clients"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              `px-4 py-2 rounded-lg font-medium transition
+              ${isActive
+                ? 'bg-[#7367f0]/10 text-[#7367f0]'
+                : 'text-gray-600 hover:bg-gray-100'}`
+            }
+          >
+            
+            Clients
+          </NavLink>
+
           <NavLink
             to="billing"
             onClick={() => setOpen(false)}
@@ -71,7 +102,8 @@ export default function DashboardLayout() {
             ☰
           </button>
           <span className="ml-4 font-semibold text-gray-700">
-            Client Panel
+            {/* {client_name} */}
+            Menu
           </span>
         </header>
 
