@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useState } from "react";
 import {useParams} from 'react-router-dom';
+import Breadcrumb from "../components/Breadcrump";
 
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
@@ -109,6 +110,7 @@ export default function DashboardLayout() {
 
         {/* Main content */}
         <main className="flex-1 p-4 md:p-8">
+           {/* <Breadcrumb /> */}
           <Outlet />
         </main>
       </div>
