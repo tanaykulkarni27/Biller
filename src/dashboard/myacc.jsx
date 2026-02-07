@@ -59,16 +59,41 @@ export default function MyAccount() {
         </div>
 
         {/* PROFILE CARD */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col md:flex-row gap-6">
-          <Avatar name="Tanay Kulkarni" size={72} />
+        {/* PROFILE CARD */}
+<div className="bg-white rounded-2xl border border-gray-200 p-6">
+  <div className="flex flex-col md:flex-row md:items-center gap-6">
+    
+    {/* Avatar */}
+    <Avatar name="Tanay Kulkarni" size={72} />
 
-          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InfoItem icon={<Mail size={16} />} text="tanay@example.com" />
-            <InfoItem icon={<MapPin size={16} />} text="Pune, Maharashtra, India" />
-            <InfoItem icon={<Calendar size={16} />} text="Subscribed on: 12 Jan 2024" />
-            <InfoItem icon={<Calendar size={16} />} text="Renewal Date: 12 Jan 2025" />
-          </div>
-        </div>
+    {/* Name + Info */}
+    <div className="flex-1 space-y-4">
+      
+      {/* Name + Renew */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Tanay Kulkarni
+        </h2>
+
+        <button
+          className="px-5 py-2 rounded-lg text-white font-medium transition shadow-sm hover:shadow-md active:scale-95"
+          style={{ backgroundColor: themeColor }}
+        >
+          Renew Subscription
+        </button>
+      </div>
+
+      {/* Info Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <InfoItem icon={<Mail size={16} />} text="tanay@example.com" />
+        <InfoItem icon={<MapPin size={16} />} text="Pune, Maharashtra, India" />
+        <InfoItem icon={<Calendar size={16} />} text="Subscribed on: 12 Jan 2024" />
+        <InfoItem icon={<Calendar size={16} />} text="Valid Until: 12 Jan 2025" />
+      </div>
+    </div>
+  </div>
+</div>
+
 
         {/* STATS GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
