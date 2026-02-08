@@ -85,7 +85,7 @@ export default function DashboardLayout() {
             }
           >
             <Receipt size={18} />
-            Billing
+            Invoice
           </NavLink>
 
           <NavLink
@@ -99,7 +99,7 @@ export default function DashboardLayout() {
             }
           >
             <PlusSquare size={18} />
-            Add Bill
+            Add Invoice
           </NavLink>
         </nav>
 
