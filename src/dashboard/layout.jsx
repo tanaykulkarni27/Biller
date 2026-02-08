@@ -1,7 +1,13 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useState } from "react";
 import {useParams} from 'react-router-dom';
-import Breadcrumb from "../components/Breadcrump";
+import {
+  User,
+  Users,
+  Receipt,
+  PlusSquare,
+  LogOut,
+} from "lucide-react";
 
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
@@ -34,18 +40,18 @@ export default function DashboardLayout() {
         </h1>
 
         <nav className="flex flex-col gap-2">
-          
+  
           <NavLink
             to="myacc"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
-              `px-4 py-2 rounded-lg font-medium transition
+              `flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition
               ${isActive
                 ? 'bg-[#7367f0]/10 text-[#7367f0]'
                 : 'text-gray-600 hover:bg-gray-100'}`
             }
           >
-            
+            <User size={18} />
             My Account
           </NavLink>
 
@@ -53,13 +59,13 @@ export default function DashboardLayout() {
             to="/clients"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
-              `px-4 py-2 rounded-lg font-medium transition
+              `flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition
               ${isActive
                 ? 'bg-[#7367f0]/10 text-[#7367f0]'
                 : 'text-gray-600 hover:bg-gray-100'}`
             }
           >
-            
+            <Users size={18} />
             Clients
           </NavLink>
 
@@ -67,12 +73,13 @@ export default function DashboardLayout() {
             to="billing"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
-              `px-4 py-2 rounded-lg font-medium transition
+              `flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition
               ${isActive
                 ? 'bg-[#7367f0]/10 text-[#7367f0]'
                 : 'text-gray-600 hover:bg-gray-100'}`
             }
           >
+            <Receipt size={18} />
             Billing
           </NavLink>
 
@@ -80,15 +87,31 @@ export default function DashboardLayout() {
             to="addBill"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
-              `px-4 py-2 rounded-lg font-medium transition
+              `flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition
               ${isActive
                 ? 'bg-[#7367f0]/10 text-[#7367f0]'
                 : 'text-gray-600 hover:bg-gray-100'}`
             }
           >
+            <PlusSquare size={18} />
             Add Bill
           </NavLink>
         </nav>
+
+          {/* Logout at bottom */}
+    <div className=" pt-2 border-t border-gray-200 mt-8 ">
+      <button
+        onClick={() => {
+          setOpen(false);
+          // TODO: clear auth + redirect to login
+          console.log("Logout");
+        }}
+        className="w-full px-4 py-2 rounded-lg text-sm font-medium
+        text-red-600 hover:bg-red-50 transition"
+      >
+        Logout
+      </button>
+    </div>
       </aside>
 
       {/* Content area */}
