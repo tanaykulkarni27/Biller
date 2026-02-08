@@ -1,40 +1,31 @@
 import Avatar from "@/components/Avatar";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-const billingData = [
-  {
-    client: "Tanay",
-    billName: "January Invoice",
-    amount: "₹12,000",
-    status: "paid",
-  },
-  {
-    client: "Aarav",
-    billName: "February Invoice",
-    amount: "₹8,500",
-    status: "pending",
-  },
-  {
-    client: "Priya",
-    billName: "Service Charges",
-    amount: "₹15,200",
-    status: "paid",
-  },
-];
-
+import aaxios from "../hooks/aaxios";
+import Loader from "@/components/Loader";
 
 export default function Billing() {
   const navigate = useNavigate();
+  const [data,setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  useEffect(()=>{
+    setIsLoading(true);
+    aaxios.get('/invoice').then(res=>{
+      setData(res.data);
+    }).catch(err=>{});
+    setIsLoading(false);
+  },[]);
   return (
     <div>
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        {isLoading ? (<Loader />):
         
-        {/* Scroll container */}
         <div className="max-w-screen overflow-x-auto no-scrollbar">
           <table className="w-full min-w-[720px] text-sm">
             <thead className="bg-gray-50 text-gray-600">
               <tr>
                 <th className="px-6 py-3 text-left">Client</th>
-                <th className="px-6 py-3 text-left">Billing Name</th>
+                <th className="px-6 py-3 text-left">Invoice No</th>
                 <th className="px-6 py-3 text-left">Amount</th>
                 <th className="px-6 py-3 text-left">Status</th>
                 <th className="px-6 py-3 text-left">View</th>
@@ -42,7 +33,7 @@ export default function Billing() {
             </thead>
 
             <tbody>
-              {billingData.map((item, index) => (
+              {data.map((item, index) => { console.log(item);return(
                 <tr
                   key={index}
                   className="border-t hover:bg-gray-50 transition"
@@ -55,11 +46,11 @@ export default function Billing() {
                   </td>
 
                   <td className="px-6 py-4 text-gray-600">
-                    {item.billName}
+                    {item.invoice_no}
                   </td>
 
                   <td className="px-6 py-4 font-semibold text-gray-800">
-                    {item.amount}
+                    {item.total_amount}
                   </td>
 
                   {/* Status */}
@@ -68,15 +59,18 @@ export default function Billing() {
                   </td>
 
                   <td className="px-6 py-4">
-                    <button className="text-[#7367f0] font-medium hover:underline" onClick={()=>navigate('../bill')}>
+                    <button className="text-[#7367f0] font-medium hover:underline" 
+                      onClick={()=>navigate('../bill', {
+                      state: { invoice: item }
+                    })}>
                       View
                     </button>
                   </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
-        </div>
+        </div>}
 
       </div>
     </div>
@@ -84,7 +78,7 @@ export default function Billing() {
 }
 
 function StatusBadge({ status }) {
-  const isPaid = status === "paid";
+  const isPaid = status === "PAID";
 
   return (
     <span

@@ -1,18 +1,43 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import aaxios from '@/hooks/aaxios'
+import Loader from '../components/Loader'
 
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [reqError, setReqError] = useState('');
   const nav = useNavigate()
-
-  const handleSubmit = (e) => {
+  const [isLoading, setIsLoading] = useState(false)
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log({ email, password })
+    // console.log({ email, password })
+     try {
+      setIsLoading(true);
+    const response = await aaxios.post("/login", {
+      email,
+      password,
+    });
+      
+    localStorage.setItem("token", response.data.token);
+    console.log(localStorage.getItem("token"));
+    nav('/clients');  
+    setIsLoading(false);
+  } catch (error) {
+    setIsLoading(false);
+    if (error.response) {
+      setReqError(error.response.data.message || "Login failed");
+      // server responded with error status
+      throw new Error(error.response.data.message || "Login failed");
+    } else if (error.request) {
+      setReqError("No response from server");
+      throw new Error("No response from server");
+    } else {
+      // something else
+      throw new Error(error.message);
+    }
   }
-
-  const handleLogin = () => {
-    nav('/clients')
+    
   }
 
   return (
@@ -68,14 +93,13 @@ function Login() {
           {/* Button */}
           <button
             type="submit"
-            onClick={handleLogin}
             className="w-full bg-primary text-white py-3 rounded-lg font-medium
               hover:opacity-90 transition active:scale-[0.99]"
           >
             Login
           </button>
         </form>
-
+        <p className="text-red-500 text-sm mt-6 text-center">{reqError}</p>
         {/* Footer */}
         <p className="text-sm text-gray-500 text-center mt-6">
           Don’t have an account?{' '}
@@ -84,6 +108,9 @@ function Login() {
           </span>
         </p>
       </div>
+
+
+      {isLoading && (<Loader />)}
     </div>
   )
 }

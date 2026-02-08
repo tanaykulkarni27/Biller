@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {useParams} from 'react-router-dom';
 import {
@@ -12,6 +12,11 @@ import {
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const {client_name} = useParams();
+  const nav = useNavigate();
+  const logout = () => {
+    localStorage.removeItem("token");
+    nav("/");
+  }
   return (
     <div className="min-h-screen flex bg-gray-50">
 
@@ -101,11 +106,7 @@ export default function DashboardLayout() {
           {/* Logout at bottom */}
     <div className=" pt-2 border-t border-gray-200 mt-8 ">
       <button
-        onClick={() => {
-          setOpen(false);
-          // TODO: clear auth + redirect to login
-          console.log("Logout");
-        }}
+        onClick={logout}
         className="w-full px-4 py-2 rounded-lg text-sm font-medium
         text-red-600 hover:bg-red-50 transition"
       >

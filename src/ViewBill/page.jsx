@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect,useState } from "react";
+import aaxios from "../hooks/aaxios";
 import {
   ArrowLeft,
   Download,
@@ -15,37 +17,21 @@ const themeColor = "#7367f0";
 
 export default function ViewBill() {
   const [isEditing, setIsEditing] = useState(false);
+  const { state } = useLocation();
+  const navigate = useNavigate();
 
+  // if user refreshes page → state is lost
+  useEffect(() => {
+    if (!state?.invoice) {
+      navigate(-1); // go back safely
+    }
+  }, [state, navigate]);
+
+  if (!state?.invoice) return null;
+
+  const { invoice } = state;
   // Example dynamic data - Columns can change
-  const [billData, setBillData] = useState({
-    id: "INV-2024-001",
-    status: "Pending",
-    date: "2024-02-08",
-    dueDate: "2024-02-22",
-    items: [
-      {
-        id: 1,
-        description: "UI/UX Design Services",
-        quantity: 1,
-        rate: 12000,
-        tax: "18%",
-      },
-      {
-        id: 2,
-        description: "Frontend Development",
-        quantity: 40,
-        rate: 800,
-        tax: "18%",
-      },
-      {
-        id: 3,
-        description: "Server Maintenance",
-        quantity: 1,
-        rate: 5000,
-        tax: "5%",
-      },
-    ],
-  });
+  const [billData, setBillData] = useState(invoice);
 
   // Extract keys dynamically for table headers
   const tableHeaders = Object.keys(billData.items[0]).filter(
@@ -60,14 +46,38 @@ export default function ViewBill() {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case "Paid":
+      case "PAID":
         return "bg-green-100 text-green-700";
-      case "Pending":
+      case "PENDING":
         return "bg-orange-100 text-orange-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
   };
+
+  const getPDF = async ()=>{
+    try {
+    const response = await aaxios.get(`/invoice/${billData.invoice_no}`, {
+      responseType: "blob", // 🔥 IMPORTANT
+    });
+
+    // Create a blob URL
+    const file = new Blob([response.data], {
+      type: "application/pdf",
+    });
+
+    const fileURL = URL.createObjectURL(file);
+
+    // Open in new tab
+    window.open(fileURL, "_blank");
+
+    // Optional cleanup (browser handles it, but safe)
+    setTimeout(() => URL.revokeObjectURL(fileURL), 1000);
+
+  } catch (err) {
+    console.error("Failed to fetch PDF", err);
+  }
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen p-8">
@@ -83,7 +93,7 @@ export default function ViewBill() {
           </button>
 
           <div className="flex gap-3 w-full sm:w-auto">
-            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition shadow-sm">
+            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition shadow-sm" onClick={getPDF}>
               <Download size={18} />
               Download PDF
             </button>
@@ -126,7 +136,7 @@ export default function ViewBill() {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-gray-800">
-                    {billData.id}
+                    {billData.invoice_no}
                   </h1>
                  <button
   disabled={!isEditing}
@@ -143,7 +153,7 @@ export default function ViewBill() {
   `}
   title={isEditing ? "Click to change status" : ""}
 >
-  {billData.status === "Paid" ? (
+  {billData.status === "PAID" ? (
     <span className="flex items-center gap-1">
       <CheckCircle size={14} /> Paid
     </span>
@@ -229,18 +239,18 @@ export default function ViewBill() {
           {/* TOTALS SECTION */}
           <div className="p-6 bg-gray-50 flex justify-end">
             <div className="w-full sm:w-64 space-y-3">
-              <div className="flex justify-between text-sm text-gray-500">
+              {/* <div className="flex justify-between text-sm text-gray-500">
                 <span>Subtotal</span>
                 <span className="font-semibold text-gray-800">₹44,000</span>
               </div>
               <div className="flex justify-between text-sm text-gray-500">
                 <span>Tax</span>
                 <span className="font-semibold text-gray-800">₹4,000</span>
-              </div>
+              </div> */}
               <div className="h-px bg-gray-200 my-2"></div>
               <div className="flex justify-between text-lg font-bold">
                 <span className="text-gray-800">Total</span>
-                <span style={{ color: themeColor }}>₹48,000</span>
+                <span style={{ color: themeColor }}>₹{billData.total_amount}</span>
               </div>
             </div>
           </div>
