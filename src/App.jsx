@@ -1,6 +1,7 @@
 import './App.css'
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import Login from './login/page'
+import VerifyEmail from './login/verifyEmail'
 import Clients from './clients/page'
 // Single Client Handling 
 import DashboardLayout from './dashboard/layout'
@@ -10,6 +11,7 @@ import Myacc from './dashboard/myacc'
 import ViewBill from './ViewBill/page'
 import ForgotPassword from './forgotpassword/Email'
 import ResetPassword from './forgotpassword/resetpassword'
+import Signup from './signup'
 
 const ProtectedRoute = () => {
   const token = localStorage.getItem("token");
@@ -32,9 +34,12 @@ function App() {
       <Routes>
 
         {/* Public routes */}
-        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/signup" element={<Signup />} />
          <Route element={<ProtectedRoute />}>
           <Route path="/clients" element={<Clients />} />
           <Route path="/dashboard/:client_name" element={<DashboardLayout />} >
@@ -47,7 +52,7 @@ function App() {
         
         </Route>
       
-        {/* <Route path="*" element={<NotFound />} /> */}
+        <Route path="*" element={<Navigate to="/login" replace/>} />
 
       </Routes>
     </BrowserRouter>
