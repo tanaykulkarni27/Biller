@@ -3,10 +3,12 @@ import { X } from "lucide-react";
 
 const themeColor = "#7367f0";
 
-export default function AddClientModal({ open, onClose, onSubmit }) {
+export default function AddClientModal({ open, onClose, onSubmit,error }) {
   const [name, setName] = useState("");
   const [vendorId, setVendorId] = useState("");
   const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [pincode, setPincode] = useState("");
 
   // Close on ESC
   useEffect(() => {
@@ -19,19 +21,23 @@ export default function AddClientModal({ open, onClose, onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name || !vendorId) return;
+    if (!name || !vendorId || !address || !city || !pincode) return;
 
     onSubmit({
       name,
       vendorId,
       address,
+      city,
+      pincode,
     });
 
     // Reset
     setName("");
     setVendorId("");
     setAddress("");
-    onClose();
+    setCity("");
+    setPincode("");
+    // onClose();
   };
 
   return (
@@ -94,22 +100,52 @@ export default function AddClientModal({ open, onClose, onSubmit }) {
             />
           </div>
 
-          {/* Address */}
           <div>
             <label className="text-sm font-medium text-gray-600">
               Address
             </label>
-            <textarea
+            <input
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="Optional address"
-              rows={3}
+              placeholder="e.g. 102, Anant Gaurav Chambers, MG Road"
               className="mt-1 w-full px-4 py-2.5 rounded-lg border
-              focus:outline-none focus:ring-1 resize-none"
+              focus:outline-none focus:ring-1"
               style={{ '--tw-ring-color': themeColor }}
             />
           </div>
 
+          {/* City + Pincode */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-gray-600">
+                City
+              </label>
+              <input
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="e.g. Pune"
+                className="mt-1 w-full px-4 py-2.5 rounded-lg border
+                focus:outline-none focus:ring-1"
+                style={{ '--tw-ring-color': themeColor }}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-600">
+                Pincode
+              </label>
+              <input
+                value={pincode}
+                onChange={(e) => setPincode(e.target.value)}
+                placeholder="e.g. 411001"
+                inputMode="numeric"
+                className="mt-1 w-full px-4 py-2.5 rounded-lg border
+                focus:outline-none focus:ring-1"
+                style={{ '--tw-ring-color': themeColor }}
+              />
+            </div>
+          </div>
+          <p className="text-red-500 text-sm">{error}</p>
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-4">
             <button

@@ -100,6 +100,14 @@ function Login() {
           </button>
         </form>
         <p className="text-red-500 text-sm mt-6 text-center">{reqError}</p>
+        <p className="text-sm text-center mt-4">
+          <span
+            onClick={() => nav("/forgot-password")}
+            className="text-primary font-medium cursor-pointer hover:underline"
+          >
+            Forgot password?
+          </span>
+        </p>
         {/* Footer */}
         <p className="text-sm text-gray-500 text-center mt-6">
           Don’t have an account?{' '}

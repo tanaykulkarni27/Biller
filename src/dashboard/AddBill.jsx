@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Trash2, Plus, Type, Hash, Layout, Save, X } from "lucide-react";
-
+import {storage} from "../hooks/storage";
+import aaxios from "../hooks/aaxios";
 export default function AddBill() {
   const [columns, setColumns] = useState([]);
   const [newColName, setNewColName] = useState("");
@@ -11,23 +12,24 @@ export default function AddBill() {
   const [rows, setRows] = useState([]);
 
   const [invoiceNo, setInvoiceNo] = useState("");
-  const [status, setStatus] = useState("draft");
+  const [status, setStatus] = useState("PENDING");
   const [invoiceDate, setInvoiceDate] = useState(
     new Date().toISOString().split("T")[0]
   );
+  const [total_amount, setTotalAmount] = useState(0);
   // Add empty row
   const addRow = () => {
     const emptyRow = {};
     columns.forEach((col) => {
-      emptyRow[col.id] = "";
+      emptyRow[col.name] = "";
     });
     setRows([...rows, emptyRow]);
   };
 
   // Update cell
-  const updateCell = (rowIndex, colId, value) => {
+  const updateCell = (rowIndex, colName, value) => {
     const updated = [...rows];
-    updated[rowIndex][colId] = value;
+    updated[rowIndex][colName] = value;
     setRows(updated);
   };
 
@@ -83,7 +85,27 @@ export default function AddBill() {
     if (editingId === id) cancelEdit();
   };
 
-  const submitInvoice = () => {}
+  const submitInvoice = () => {
+    const InvoiceData = {
+                          vendorId:storage.get('client')?storage.get('client').vendorId:null,
+                          invoice_no : invoiceNo,
+                          date : invoiceDate,
+                          status,
+                          items : rows,
+                          total_amount
+                        };
+    if(!invoiceNo || !invoiceDate || !status || rows.length <= 0 || !InvoiceData.vendorId || !total_amount){
+      alert("Please fill all required fields");
+      return;
+    }
+    aaxios.post('/invoice/add', InvoiceData).then(res=>{
+      alert("Invoice created successfully");
+      window.history.back();
+    }).catch(err=>{
+      alert("Error creating invoice");
+      console.log(err.response?.data?.message  || "Error creating invoice");
+    });
+  };
 
   return (
     <div className="bg-white min-h-screen p-8">
@@ -316,7 +338,7 @@ export default function AddBill() {
                               type={col.isNumeric ? "number" : "text"}
                               value={row[col.id]}
                               onChange={(e) =>
-                                updateCell(rowIndex, col.id, e.target.value)
+                                updateCell(rowIndex, col.name, e.target.value)
                               }
                               className="w-full px-2 py-1.5 border rounded-md
                       focus:outline-none focus:ring-1"
@@ -383,6 +405,19 @@ export default function AddBill() {
               type="date"
               value={invoiceDate}
               onChange={(e) => setInvoiceDate(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300
+              focus:outline-none focus:ring-2"
+              style={{ '--tw-ring-color': themeColor }}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Total Amount
+            </label>
+            <input
+              type="number"
+              value={total_amount}
+              onChange={(e) => setTotalAmount(e.target.value)}
               className="w-full px-4 py-2 rounded-lg border border-gray-300
               focus:outline-none focus:ring-2"
               style={{ '--tw-ring-color': themeColor }}

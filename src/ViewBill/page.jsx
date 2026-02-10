@@ -144,7 +144,7 @@ export default function ViewBill() {
     if (!isEditing) return;
     setBillData({
       ...billData,
-      status: billData.status === "Paid" ? "Pending" : "Paid",
+      status: billData.status === "PAID" ? "PENDING" : "PAID",
     });
   }}
   className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider transition

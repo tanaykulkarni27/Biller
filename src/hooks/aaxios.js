@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const aaxios = axios.create({
-  // baseURL: 'http://localhost:3000', // Replace with your API base URL
-  baseURL: 'https://billerbackend-sepia.vercel.app', // Replace with your API base URL
+  baseURL: 'http://localhost:3000', // Replace with your API base URL
+  // baseURL: 'https://billerbackend-sepia.vercel.app', // Replace with your API base URL
   timeout: 10000
 });
 

@@ -2,6 +2,7 @@ import Avatar from "@/components/Avatar";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import aaxios from "../hooks/aaxios";
+import {storage} from "../hooks/storage";
 import Loader from "@/components/Loader";
 
 export default function Billing() {
@@ -10,14 +11,14 @@ export default function Billing() {
   const [isLoading, setIsLoading] = useState(false);
   useEffect(()=>{
     setIsLoading(true);
-    aaxios.get('/invoice').then(res=>{
+    aaxios.get('/invoice',{params:{vendorId:storage.get('client').vendorId}}).then(res=>{
       setData(res.data);
     }).catch(err=>{});
     setIsLoading(false);
   },[]);
   return (
     <div>
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden relative">
         {isLoading ? (<Loader />):
         
         <div className="max-w-screen overflow-x-auto no-scrollbar">
@@ -33,15 +34,15 @@ export default function Billing() {
             </thead>
 
             <tbody>
-              {data.map((item, index) => { console.log(item);return(
+              {data.map((item, index) =>(
                 <tr
                   key={index}
                   className="border-t hover:bg-gray-50 transition"
                 >
                   <td className="px-6 py-4 flex items-center gap-3">
-                    <Avatar name={item.client} size={36} />
+                    <Avatar name={storage.get('client').name} size={36} />
                     <span className="font-medium text-gray-700">
-                      {item.client}
+                      {storage.get('client').name}
                     </span>
                   </td>
 
@@ -67,7 +68,7 @@ export default function Billing() {
                     </button>
                   </td>
                 </tr>
-              )})}
+              ))}
             </tbody>
           </table>
         </div>}
