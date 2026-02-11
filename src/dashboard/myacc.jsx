@@ -1,26 +1,29 @@
 import { useState } from "react";
 import Avatar from "@/components/Avatar";
+import {storage} from "@/hooks/storage";
 import {
   Calendar,
   Mail,
   MapPin,
   IndianRupee
 } from "lucide-react";
+import { formatDateFromSeconds } from "../utils/utils";
 
 const themeColor = "#7367f0";
 
 export default function MyAccount() {
   const [filter, setFilter] = useState("1year");
-
-  const stats = [
-    { label: "Total Bills", value: 128 },
-    { label: "Pending Bills", value: 14 },
-    { label: "Total Billed Amount", value: "₹4,80,000" },
-    { label: "Amount Received", value: "₹4,10,000" },
-    { label: "Total Earned", value: "₹3,75,000" },
-    { label: "Pending Amount", value: "₹70,000" },
-  ];
-
+  const user = storage.get('user');
+  const stats = storage.get('stats');
+  const invoiceStatsConfig = [
+  { key: "totalInvoice", label: "Total Invoices" },
+  { key: "paidInvoice", label: "Paid Invoices" },
+  { key: "pendingInvoice", label: "Pending Invoices" },
+  { key: "totalAmount", label: "Total Amount" },
+  { key: "amountReceived", label: "Amount Received" },
+  { key: "amountPending", label: "Amount Pending" },
+];
+  console.log(stats)
   return (
     // min-h-screen md:max-h-screen
     <div className=" bg-gray-50 p-8 md:p-0 ">
@@ -33,7 +36,7 @@ export default function MyAccount() {
           </h1>
 
           {/* Filters */}
-          <div className="flex gap-2 bg-white p-1 rounded-xl border">
+          <div className="flex gap-2 bg-white p-1 rounded-xl border invisible">
             {[
               { id: "1month", label: "1 Month" },
               { id: "1quarter", label: "1 Quarter" },
@@ -65,7 +68,7 @@ export default function MyAccount() {
   <div className="flex flex-col md:flex-row md:items-center gap-6">
     
     {/* Avatar */}
-    <Avatar name="Tanay Kulkarni" size={72} />
+    <Avatar name={user.name} size={72} />
 
     {/* Name + Info */}
     <div className="flex-1 space-y-4">
@@ -73,23 +76,23 @@ export default function MyAccount() {
       {/* Name + Renew */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h2 className="text-xl font-semibold text-gray-800">
-          Tanay Kulkarni
+          {user.name}
         </h2>
 
-        <button
+        {/* <button
           className="px-5 py-2 rounded-lg text-white font-medium transition shadow-sm hover:shadow-md active:scale-95"
           style={{ backgroundColor: themeColor }}
         >
           Renew Subscription
-        </button>
+        </button> */}
       </div>
 
       {/* Info Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <InfoItem icon={<Mail size={16} />} text="tanay@example.com" />
-        <InfoItem icon={<MapPin size={16} />} text="Pune, Maharashtra, India" />
-        <InfoItem icon={<Calendar size={16} />} text="Subscribed on: 12 Jan 2024" />
-        <InfoItem icon={<Calendar size={16} />} text="Valid Until: 12 Jan 2025" />
+        <InfoItem icon={<Mail size={16} />} text={user.email} />
+        <InfoItem icon={<MapPin size={16} />} text={user.address} />
+        <InfoItem icon={<Calendar size={16} />} text={`Joined on: ${formatDateFromSeconds(user.joinedAt._seconds)}`} />
+        {/* <InfoItem icon={<Calendar size={16} />} text="Valid Until: 12 Jan 2025" /> */}
       </div>
     </div>
   </div>
@@ -98,20 +101,20 @@ export default function MyAccount() {
 
         {/* STATS GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {stats.map((stat, idx) => (
+          {invoiceStatsConfig.map((statConfig, idx) => (
             <div
               key={idx}
               className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition"
             >
               <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
                 <IndianRupee size={14} />
-                {stat.label}
+                {statConfig.label}
               </div>
               <div
                 className="text-2xl font-bold"
                 style={{ color: themeColor }}
               >
-                {stat.value}
+                {stats[statConfig.key]}
               </div>
             </div>
           ))}

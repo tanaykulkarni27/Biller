@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import aaxios from "@/hooks/aaxios";
 import Loader from "../components/Loader";
-
+import {storage} from '@/hooks/storage';
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +25,9 @@ function Login() {
       });
 
       localStorage.setItem("token", response.data.token);
-      console.log(localStorage.getItem("token"));
+      storage.set("user", response.data.user);
+      storage.set("stats", response.data.stats);
+      // console.log(localStorage.getItem("token"));
       nav("/clients");
       setIsLoading(false);
     } catch (error) {

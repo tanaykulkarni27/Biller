@@ -116,7 +116,7 @@ export default function AddBill() {
             Configure Invoice
           </h2>
           <p className="text-gray-500">
-            Define the structure of your billing table.
+            Define the structure of your invoice table.
           </p>
         </div>
 
@@ -143,7 +143,7 @@ export default function AddBill() {
                     type="text"
                     value={newColName}
                     onChange={(e) => setNewColName(e.target.value)}
-                    placeholder="e.g. Quantity, Price"
+                    placeholder="e.g. Particulars, Legal Service"
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all"
                     style={{
                       "--tw-ring-color": themeColor,

@@ -74,9 +74,9 @@ export default function ViewBill() {
     // Optional cleanup (browser handles it, but safe)
     setTimeout(() => URL.revokeObjectURL(fileURL), 1000);
 
-  } catch (err) {
-    console.error("Failed to fetch PDF", err);
-  }
+    } catch (err) {
+      console.error("Failed to fetch PDF", err);
+    }
   }
 
   return (
@@ -239,14 +239,6 @@ export default function ViewBill() {
           {/* TOTALS SECTION */}
           <div className="p-6 bg-gray-50 flex justify-end">
             <div className="w-full sm:w-64 space-y-3">
-              {/* <div className="flex justify-between text-sm text-gray-500">
-                <span>Subtotal</span>
-                <span className="font-semibold text-gray-800">₹44,000</span>
-              </div>
-              <div className="flex justify-between text-sm text-gray-500">
-                <span>Tax</span>
-                <span className="font-semibold text-gray-800">₹4,000</span>
-              </div> */}
               <div className="h-px bg-gray-200 my-2"></div>
               <div className="flex justify-between text-lg font-bold">
                 <span className="text-gray-800">Total</span>

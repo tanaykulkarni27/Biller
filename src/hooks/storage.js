@@ -1,11 +1,6 @@
 const PREFIX = "app:"; // avoids key collisions
 
 export const storage = {
-  /**
-   * Save any value to localStorage
-   * @param {string} key
-   * @param {any} value
-   */
   set(key, value) {
     try {
       const data =
@@ -19,11 +14,6 @@ export const storage = {
     }
   },
 
-  /**
-   * Get value from localStorage (auto parses JSON)
-   * @param {string} key
-   * @returns {any | null}
-   */
   get(key) {
     try {
       const data = localStorage.getItem(PREFIX + key);

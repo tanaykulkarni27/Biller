@@ -19,7 +19,7 @@ export default function Clients() {
         }).catch(err => {
             console.error("Error fetching clients:", err);
         });
-  }, []);
+  }, [clients]);
 
   const handleSelectClient = (client) => {
     storage.set("client", client);

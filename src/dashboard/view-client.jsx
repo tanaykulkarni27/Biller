@@ -1,5 +1,9 @@
 import { useState } from "react";
 import Avatar from "@/components/Avatar";
+import {storage} from '@/hooks/storage';
+import aaxios from '@/hooks/aaxios';
+import Loader from '@/components/Loader';
+
 import {
   Hash,
   MapPin,
@@ -9,22 +13,17 @@ import {
   Save,
   X,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const themeColor = "#7367f0";
 
 export default function ViewClient() {
   const [isEditing, setIsEditing] = useState(false);
-
-  const [client, setClient] = useState({
-    name: "ABC Traders",
-    vendorId: "VND-10234",
-    address: "Shop No 12, MG Road",
-    city: "Pune",
-    pincode: "411001",
-  });
+  const [isLoading,setLoading] = useState(false);
+  const [client, setClient] = useState(storage.get('client'));
 
   const [form, setForm] = useState(client);
-
+  const nav = useNavigate();
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -40,9 +39,9 @@ export default function ViewClient() {
   };
 
   const handleSave = () => {
-    // API call here
-    console.log("Saving client:", form);
-
+    setLoading(true);
+    aaxios.put('/client/'+client.vendorId, form).then(res=>{});
+    setLoading(false);
     setClient(form);
     setIsEditing(false);
   };
@@ -53,12 +52,18 @@ export default function ViewClient() {
     );
 
     if (!confirmDelete) return;
-
-    console.log("Deleting client:", client.vendorId);
+    setLoading(true);
+    aaxios.delete('/client/'+client.vendorId).then(res=>{});
+    setLoading(false);
+    setClient(form);
+    setIsEditing(false);
+    storage.remove('client');
+    nav('/clients');
   };
 
   return (
     <div className="bg-gray-50 p-8 md:p-0">
+      {isLoading && <Loader />}
       <div className="max-w-5xl mx-auto space-y-8">
         {/* HEADER */}
         <div className="flex items-center justify-between">
@@ -111,7 +116,7 @@ export default function ViewClient() {
         {/* CLIENT CARD */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
           <div className="flex flex-col md:flex-row md:items-center gap-6">
-            <Avatar name={client.name} size={72} />
+            <Avatar name={client.name} size={140} />
 
             <div className="flex-1 space-y-4">
               {/* Client Name */}
@@ -141,7 +146,7 @@ export default function ViewClient() {
                 {/* Vendor ID - Static, no input/border */}
                 <div className="text-sm">
                   <p className="text-gray-500">Vendor ID</p>
-                  <p className="mt-1 text-gray-700 font-medium px-3 py-2 rounded-lg">
+                  <p className="mt-1 text-gray-700 font-medium  py-2 rounded-lg">
                     {client.vendorId}
                   </p>
                 </div>
