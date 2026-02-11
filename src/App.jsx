@@ -8,6 +8,7 @@ import DashboardLayout from './dashboard/layout'
 import Billing from './dashboard/Billing'
 import AddBill from './dashboard/AddBill'
 import Myacc from './dashboard/myacc'
+import ViewClient from './dashboard/view-client'
 import ViewBill from './ViewBill/page'
 import ForgotPassword from './forgotpassword/Email'
 import ResetPassword from './forgotpassword/resetpassword'
@@ -45,6 +46,7 @@ function App() {
           <Route path="/dashboard/:client_name" element={<DashboardLayout />} >
             <Route index element={<Navigate to="billing" replace />} />
             <Route path="billing" element={<Billing />} />
+            <Route path="view-client" element={<ViewClient />} />
             <Route path="addBill" element={<AddBill />} />
             <Route path="myacc" element={<Myacc />} />
             <Route path="bill" element={<ViewBill />} />

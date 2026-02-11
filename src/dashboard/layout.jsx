@@ -61,7 +61,7 @@ export default function DashboardLayout() {
           </NavLink>
 
           <NavLink
-            to="/clients"
+            to="view-client"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition
@@ -70,8 +70,8 @@ export default function DashboardLayout() {
                 : 'text-gray-600 hover:bg-gray-100'}`
             }
           >
-            <Users size={18} />
-            Clients
+            <User size={18} />
+            View Client
           </NavLink>
 
           <NavLink
@@ -102,6 +102,20 @@ export default function DashboardLayout() {
             Add Invoice
           </NavLink>
         </nav>
+
+          <NavLink
+            to="/clients"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition
+              ${isActive
+                ? 'bg-[#7367f0]/10 text-[#7367f0]'
+                : 'text-gray-600 hover:bg-gray-100'}`
+            }
+          >
+            <Users size={18} />
+            Clients
+          </NavLink>
 
           {/* Logout at bottom */}
     <div className=" pt-2 border-t border-gray-200 mt-8 ">

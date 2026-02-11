@@ -1,49 +1,77 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import aaxios from '@/hooks/aaxios'
-import Loader from '../components/Loader'
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import aaxios from "@/hooks/aaxios";
+import Loader from "../components/Loader";
 
 function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [reqError, setReqError] = useState('');
-  const nav = useNavigate()
-  const [isLoading, setIsLoading] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [reqError, setReqError] = useState("");
+
+  const [showResendPopup, setShowResendPopup] = useState(false);
+  const [resendStatus, setResendStatus] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+
+  const nav = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     // console.log({ email, password })
-     try {
+    try {
       setIsLoading(true);
-    const response = await aaxios.post("/login", {
-      email,
-      password,
-    });
-      
-    localStorage.setItem("token", response.data.token);
-    console.log(localStorage.getItem("token"));
-    nav('/clients');  
-    setIsLoading(false);
-  } catch (error) {
-    setIsLoading(false);
-    if (error.response) {
-      setReqError(error.response.data.message || "Login failed");
-      // server responded with error status
-      throw new Error(error.response.data.message || "Login failed");
-    } else if (error.request) {
-      setReqError("No response from server");
-      throw new Error("No response from server");
-    } else {
-      // something else
-      throw new Error(error.message);
+      const response = await aaxios.post("/login", {
+        email,
+        password,
+      });
+
+      localStorage.setItem("token", response.data.token);
+      console.log(localStorage.getItem("token"));
+      nav("/clients");
+      setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      if (error.response) {
+        const message = error.response.data.message || "Login failed";
+        setReqError(message);
+        if (message.toLowerCase().includes("not verified")) {
+          setShowResendPopup(true);
+          setResendStatus("");
+        }
+        // server responded with error status
+        throw new Error(error.response.data.message || "Login failed");
+      } else if (error.request) {
+        setReqError("No response from server");
+        throw new Error("No response from server");
+      } else {
+        // something else
+        throw new Error(error.message);
+      }
     }
-  }
-    
-  }
+  };
+
+  const handleResendVerification = async () => {
+    setResendLoading(true);
+    setResendStatus("");
+    try {
+      setResendLoading(true);
+      setResendStatus("");
+
+      await aaxios.post("/user/resend-verification", { email });
+
+      setResendStatus("Verification email sent successfully!");
+      setResendLoading(false);
+      
+    } catch (err) {
+      setResendLoading(false);
+      setResendStatus(
+        err.response?.data?.message || "Failed to resend verification email",
+      );
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-        
         {/* Title */}
         <h1 className="text-xl sm:text-2xl font-semibold text-center mb-6">
           Login
@@ -51,7 +79,6 @@ function Login() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -110,7 +137,7 @@ function Login() {
         </p>
         {/* Footer */}
         <p className="text-sm text-gray-500 text-center mt-6">
-          Don’t have an account?{' '}
+          Don’t have an account?{" "}
           <Link to="/signup">
             <span className="text-primary font-medium cursor-pointer">
               Sign up
@@ -118,11 +145,46 @@ function Login() {
           </Link>
         </p>
       </div>
+      {isLoading && <Loader />}
 
+      {showResendPopup && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-sm shadow-lg text-center">
+            <h2 className="text-lg font-semibold text-gray-800">
+              Email not verified
+            </h2>
 
-      {isLoading && (<Loader />)}
+            <p className="text-sm text-gray-600 mt-3">
+              Your account is not verified. Please check your email for the
+              verification link.
+            </p>
+
+            {resendStatus && (
+              <p className="text-sm mt-3 text-green-600">{resendStatus}</p>
+            )}
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowResendPopup(false)}
+                className="flex-1 border rounded-lg py-2 text-sm hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleResendVerification}
+                disabled={resendLoading}
+                className="flex-1 bg-primary text-white rounded-lg py-2 text-sm
+            hover:opacity-90 disabled:opacity-50"
+              >
+                {resendLoading ? "Sending..." : "Resend Link"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;
