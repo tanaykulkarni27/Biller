@@ -160,7 +160,10 @@ function Login() {
               Your account is not verified. Please check your email for the
               verification link.
             </p>
-
+            {/* Added Spam Note */}
+            <p className="text-xs text-gray-500 mt-2">
+              If you don’t see the email, please check your spam or junk folder.
+            </p>
             {resendStatus && (
               <p className="text-sm mt-3 text-green-600">{resendStatus}</p>
             )}

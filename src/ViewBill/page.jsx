@@ -57,17 +57,16 @@ export default function ViewBill() {
 
   const getPDF = async ()=>{
     try {
-    const response = await aaxios.get(`/invoice/${billData.invoice_no}`, {
-      responseType: "blob", // 🔥 IMPORTANT
-    });
-
+    const response = await aaxios.get(`/invoice/${billData.invoice_no}`,{responseType: "blob"});
+    // console.log("DONEE")
+    // console.log("PDF URL:", response.data);
     // Create a blob URL
     const file = new Blob([response.data], {
       type: "application/pdf",
     });
 
     const fileURL = URL.createObjectURL(file);
-
+    console.log('successfully fetched PDF:');
     // Open in new tab
     window.open(fileURL, "_blank");
 

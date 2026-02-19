@@ -3,7 +3,12 @@ import { Trash2, Plus, Type, Hash, Layout, Save, X } from "lucide-react";
 import {storage} from "../hooks/storage";
 import aaxios from "../hooks/aaxios";
 export default function AddBill() {
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState([
+  { id: 1, name: "Date", isNumeric: false },
+  { id: 2, name: "Task", isNumeric: false },
+  { id: 3, name: "Hours Spend", isNumeric: true },
+  { id: 4, name: "Fees", isNumeric: true },
+]);
   const [newColName, setNewColName] = useState("");
   const [isNumeric, setIsNumeric] = useState(false);
   const [editingId, setEditingId] = useState(null); // Track edit state
