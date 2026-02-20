@@ -91,7 +91,7 @@ export default function ViewBill() {
             Back to Dashboard
           </button>
 
-          <div className="flex gap-3 w-full sm:w-auto">
+          <div className="flex gap-3 w-full sm:w-auto hidden">
             <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition shadow-sm" onClick={getPDF}>
               <Download size={18} />
               Download PDF

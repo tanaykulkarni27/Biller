@@ -10,6 +10,19 @@ import {
 import { formatDateFromSeconds } from "../utils/utils";
 
 const themeColor = "#7367f0";
+const sampleClientBusiness = [
+  { client: "Acme Pvt Ltd", pendingInr: 45000, receivablesInr: 200000 },
+  { client: "BluePeak Solutions", pendingInr: 38500, receivablesInr: 140000 },
+  { client: "Sunrise Traders", pendingInr: 72000, receivablesInr: 248000 },
+  { client: "Nexus Retail", pendingInr: 16500, receivablesInr: 80000 },
+];
+
+const formatInr = (amount) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(amount);
 
 export default function MyAccount() {
   const [filter, setFilter] = useState("1year");
@@ -118,6 +131,46 @@ export default function MyAccount() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* CLIENT BUSINESS TABLE */}
+        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Client Pending & Receivables
+            </h3>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-sm font-medium text-gray-600">
+                    Client
+                  </th>
+                  <th className="px-6 py-3 text-sm font-medium text-gray-600 text-right">
+                    Pending (INR)
+                  </th>
+                  <th className="px-6 py-3 text-sm font-medium text-gray-600 text-right">
+                    Receivables (INR)
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {sampleClientBusiness.map((row, index) => (
+                  <tr key={row.client} className={index % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
+                    <td className="px-6 py-4 text-sm text-gray-800">{row.client}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-right" style={{ color: themeColor }}>
+                      {formatInr(row.pendingInr)}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-right" style={{ color: themeColor }}>
+                      {formatInr(row.receivablesInr)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
       </div>

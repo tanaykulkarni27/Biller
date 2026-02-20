@@ -1,11 +1,12 @@
-import React, { useState } from "react";
-import { Trash2, Plus, Type, Hash, Layout, Save, X } from "lucide-react";
+import React, { useState,useEffect } from "react";
+import { Trash2, Plus, Type, Hash, Layout, Save, X, Pen } from "lucide-react";
 import {storage} from "../hooks/storage";
 import aaxios from "../hooks/aaxios";
 export default function AddBill() {
+  const [allowEditColumns, setAllowEditColumns] = useState(false);
   const [columns, setColumns] = useState([
   { id: 1, name: "Date", isNumeric: false },
-  { id: 2, name: "Task", isNumeric: false },
+  { id: 2, name: "Work", isNumeric: false },
   { id: 3, name: "Hours Spend", isNumeric: true },
   { id: 4, name: "Fees", isNumeric: true },
 ]);
@@ -14,7 +15,20 @@ export default function AddBill() {
   const [editingId, setEditingId] = useState(null); // Track edit state
 
   const themeColor = "#7367f0";
-  const [rows, setRows] = useState([]);
+  const [rows, setRows] = useState(() => {
+  const defaultRow = {};
+  [
+    { name: "Date" },
+    { name: "Task" },
+    { name: "Hours Spend" },
+    { name: "Fees" },
+  ].forEach((col) => {
+    defaultRow[col.name] = col.name === "Date"
+      ? new Date().toISOString().split("T")[0]
+      : "";
+  });
+  return [defaultRow];
+});
 
   const [invoiceNo, setInvoiceNo] = useState("");
   const [status, setStatus] = useState("PENDING");
@@ -30,6 +44,20 @@ export default function AddBill() {
     });
     setRows([...rows, emptyRow]);
   };
+
+useEffect(() => {
+  if (rows.length === 0 && columns.length > 0) {
+    const defaultRow = {};
+    columns.forEach((col) => {
+      defaultRow[col.name] =
+        col.name === "Date"
+          ? new Date().toISOString().split("T")[0]
+          : "";
+    });
+    setRows([defaultRow]);
+  }
+}, [columns]);
+
 
   // Update cell
   const updateCell = (rowIndex, colName, value) => {
@@ -113,19 +141,26 @@ export default function AddBill() {
   };
 
   return (
-    <div className="bg-white min-h-screen p-8">
-      <div className="max-w-6xl mx-auto">
+    <>
+      <div className="md:hidden min-h-screen bg-white px-6 py-12 flex items-center justify-center">
+        <p className="text-center text-gray-700 text-base font-medium">
+          Page can&apos;t be opened on small device.
+        </p>
+      </div>
+
+      <div className="hidden md:block bg-white min-h-screen p-8">
+        <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8 border-b border-gray-200 pb-6">
+        <div className={` ${allowEditColumns?'border-b pb-6 mb-8':'m-0 p-0'}  border-gray-200 `}>
           <h2 className="text-2xl font-bold text-gray-800">
             Configure Invoice
           </h2>
-          <p className="text-gray-500">
+          <p className={`text-gray-500 ${!allowEditColumns?'hidden':'block'}`}>
             Define the structure of your invoice table.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className={`grid grid-cols-1 lg:grid-cols-12 gap-10 ${allowEditColumns?'' : 'hidden'}`}>
           {/* LEFT: Form Section (Merged into white bg) */}
           <div className="lg:col-span-4 space-y-6">
             <div>
@@ -299,21 +334,30 @@ export default function AddBill() {
         </div>
         {/* ROWS SECTION */}
         {columns.length > 0 && (
-          <div className="mt-10">
+          <div className={`${allowEditColumns?'mt-10' : 'mt-5'}`}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-800 flex items-center gap-2">
                 <Layout size={18} color={themeColor} />
-                Bill Rows
+                Invoice Data
               </h3>
-
-              <button
-                onClick={addRow}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium shadow-sm hover:shadow-md transition"
-                style={{ backgroundColor: themeColor }}
-              >
-                <Plus size={16} />
-                Add Row
-              </button>
+              <div className="flex justify-end items-center space-x-2"> 
+                <button
+                  onClick={()=> setAllowEditColumns(!allowEditColumns)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium shadow-sm hover:shadow-md transition"
+                  style={{ backgroundColor: themeColor }}
+                >
+                  {!allowEditColumns ? <Pen size={16} /> : <Save size={16} />}
+                  {allowEditColumns ? "Save Columns" : "Edit Columns"}
+                </button>
+                <button
+                  onClick={addRow}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium shadow-sm hover:shadow-md transition"
+                  style={{ backgroundColor: themeColor }}
+                >
+                  <Plus size={16} />
+                  Add Row
+                </button>
+              </div>
             </div>
 
             {rows.length === 0 ? (
@@ -341,13 +385,16 @@ export default function AddBill() {
                           <td key={col.id} className="px-4 py-2">
                             <input
                               type={col.isNumeric ? "number" : "text"}
+                              placeholder={col.name}
                               value={row[col.id]}
                               onChange={(e) =>
                                 updateCell(rowIndex, col.name, e.target.value)
                               }
-                              className="w-full px-2 py-1.5 border rounded-md
-                      focus:outline-none focus:ring-1"
-                              style={{ "--tw-ring-color": themeColor }}
+                              className={`w-full px-2 py-1.5 rounded-md 
+                                bg-gray-100
+                                focus:outline-none 
+                                focus:ring-1
+                                focus:ring-[${themeColor}]`}
                             />
                           </td>
                         ))}
@@ -380,9 +427,8 @@ export default function AddBill() {
               value={invoiceNo}
               onChange={(e) => setInvoiceNo(e.target.value)}
               placeholder="INV-001"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300
-              ocus:outline-none focus:ring-2"
-              style={{ "--tw-ring-color": themeColor }}
+              className={`w-full px-4 py-2 rounded-lg border border-gray-300
+              focus:outline-none focus:ring-2 focus:ring-[${themeColor}]`}
             />
           </div>
 
@@ -449,7 +495,8 @@ export default function AddBill() {
           Save Invoice
         </button>
       </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
