@@ -49,7 +49,7 @@ export default function MyAccount() {
           </h1>
 
           {/* Filters */}
-          <div className="flex gap-2 bg-white p-1 rounded-xl border invisible">
+          <div className="flex gap-2 bg-white p-1 rounded-xl border hidden">
             {[
               { id: "1month", label: "1 Month" },
               { id: "1quarter", label: "1 Quarter" },
