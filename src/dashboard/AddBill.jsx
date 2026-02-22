@@ -1,17 +1,17 @@
 import React, { useState,useEffect } from "react";
-import { Trash2, Plus, Type, Hash, Layout, Save, X, Pen } from "lucide-react";
+import { Trash2, Plus, Type, Hash, Layout, Save, X, Pen, AlignLeft, Calendar } from "lucide-react";
 import {storage} from "../hooks/storage";
 import aaxios from "../hooks/aaxios";
 export default function AddBill() {
   const [allowEditColumns, setAllowEditColumns] = useState(false);
   const [columns, setColumns] = useState([
-  { id: 1, name: "Date", isNumeric: false },
-  { id: 2, name: "Work", isNumeric: false },
-  { id: 3, name: "Hours Spend", isNumeric: true },
-  { id: 4, name: "Fees", isNumeric: true },
+  { id: 1, name: "Date", type: "date" },
+  { id: 2, name: "Work", type: "textarea" },
+  { id: 3, name: "Hours Spend", type: "number" },
+  { id: 4, name: "Fees", type: "number" },
 ]);
   const [newColName, setNewColName] = useState("");
-  const [isNumeric, setIsNumeric] = useState(false);
+  const [colType, setColType] = useState("text");
   const [editingId, setEditingId] = useState(null); // Track edit state
 
   const themeColor = "#7367f0";
@@ -19,7 +19,7 @@ export default function AddBill() {
   const defaultRow = {};
   [
     { name: "Date" },
-    { name: "Task" },
+    { name: "Work" },
     { name: "Hours Spend" },
     { name: "Fees" },
   ].forEach((col) => {
@@ -72,43 +72,41 @@ useEffect(() => {
   };
   // Unified handler for Add and Update
   const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!newColName.trim()) return;
+  e.preventDefault();
+  if (!newColName.trim()) return;
 
-    if (editingId) {
-      // Update Logic
-      setColumns(
-        columns.map((col) =>
-          col.id === editingId ? { ...col, name: newColName, isNumeric } : col,
-        ),
-      );
-      setEditingId(null);
-    } else {
-      // Add Logic
-      const newColumn = {
-        id: Date.now(),
-        name: newColName,
-        isNumeric: isNumeric,
-      };
-      setColumns([...columns, newColumn]);
-    }
+  if (editingId) {
+    setColumns(
+      columns.map((col) =>
+        col.id === editingId
+          ? { ...col, name: newColName, type: colType }
+          : col
+      )
+    );
+    setEditingId(null);
+  } else {
+    const newColumn = {
+      id: Date.now(),
+      name: newColName,
+      type: colType,
+    };
+    setColumns([...columns, newColumn]);
+  }
 
-    // Reset Form
-    setNewColName("");
-    setIsNumeric(false);
-  };
+  setNewColName("");
+  setColType("text");
+};
 
   // Populate form with column data
   const startEdit = (col) => {
-    setNewColName(col.name);
-    setIsNumeric(col.isNumeric);
-    setEditingId(col.id);
-  };
+  setNewColName(col.name);
+  setColType(col.type);
+  setEditingId(col.id);
+};
 
-  // Cancel edit mode
   const cancelEdit = () => {
     setNewColName("");
-    setIsNumeric(false);
+    setColType("text");   // reset to default type
     setEditingId(null);
   };
 
@@ -139,7 +137,7 @@ useEffect(() => {
       console.log(err.response?.data?.message  || "Error creating invoice");
     });
   };
-
+  const isNumeric = false;
   return (
     <>
       <div className="md:hidden min-h-screen bg-white px-6 py-12 flex items-center justify-center">
@@ -197,32 +195,29 @@ useEffect(() => {
                 </div>
 
                 {/* Custom Toggle Switch */}
-                <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-gray-700">
-                      Numerical?
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      Is this a number field?
-                    </span>
-                  </div>
+               {/* Column Type Selector */}
+                  <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-gray-700">
+                        Field Type
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        Select input type for this column
+                      </span>
+                    </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setIsNumeric(!isNumeric)}
-                    className="relative w-12 h-6 rounded-full transition-colors duration-200 ease-in-out focus:outline-none"
-                    style={{
-                      backgroundColor: isNumeric ? themeColor : "#cbd5e1",
-                    }}
-                  >
-                    <span
-                      className={`
-                        block w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-200 ease-in-out mt-0.5 ml-0.5
-                        ${isNumeric ? "translate-x-6" : "translate-x-0"}
-                      `}
-                    />
-                  </button>
-                </div>
+                    <select
+                      value={colType}
+                      onChange={(e) => setColType(e.target.value)}
+                      className="px-3 py-1.5 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-1"
+                      style={{ "--tw-ring-color": themeColor }}
+                    >
+                      <option value="text">Text</option>
+                      <option value="number">Number</option>
+                      <option value="textarea">Text Area</option>
+                      <option value="date">Date</option>
+                    </select>
+                  </div>
 
                 {/* Buttons */}
                 <div className="flex gap-2">
@@ -292,11 +287,13 @@ useEffect(() => {
                             color: editingId === col.id ? "#fff" : "#64748b",
                           }}
                         >
-                          {col.isNumeric ? (
+                          {col.type == "number"? (
                             <Hash size={18} />
-                          ) : (
-                            <Type size={18} />
-                          )}
+                          ) : col.type == "textarea" ? (
+                            <AlignLeft size={18} />
+                          ): col.type == "date" ? (
+                            <Calendar size={18} />):
+                            <Type size={18} />}
                         </div>
 
                         <div className="flex flex-col">
@@ -306,7 +303,7 @@ useEffect(() => {
                             {col.name}
                           </span>
                           <span className="text-xs text-gray-500 font-medium">
-                            {col.isNumeric ? "Number Field" : "Text Field"}
+                            {col.type.toLocaleUpperCase()}
                           </span>
                         </div>
                       </div>
@@ -380,11 +377,23 @@ useEffect(() => {
 
                   <tbody>
                     {rows.map((row, rowIndex) => (
-                      <tr key={rowIndex} className="border-t">
+                      <tr key={rowIndex} className="border-t  align-top">
                         {columns.map((col) => (
                           <td key={col.id} className="px-4 py-2">
-                            <input
-                              type={col.isNumeric ? "number" : "text"}
+                            {col.type === "textarea" ? (
+                              <textarea
+                                placeholder={col.name}
+                                value={row[col.id]}
+                                onChange={(e) =>
+                                  updateCell(rowIndex, col.name, e.target.value)
+                                }
+                                className={`w-full px-2 py-1.5 rounded-md 
+                                  bg-gray-100
+                                  focus:outline-none 
+                                  focus:ring-1
+                                  focus:ring-[${themeColor}]`}/>)
+                            :<input
+                              type={col.type}
                               placeholder={col.name}
                               value={row[col.id]}
                               onChange={(e) =>
@@ -395,7 +404,7 @@ useEffect(() => {
                                 focus:outline-none 
                                 focus:ring-1
                                 focus:ring-[${themeColor}]`}
-                            />
+                            />}
                           </td>
                         ))}
 
