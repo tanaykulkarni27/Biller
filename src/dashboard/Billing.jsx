@@ -17,7 +17,7 @@ export default function Billing() {
     setIsLoading(false);
   },[]);
   return (
-    <div>
+    <div className="p-4 md:p-8">
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden relative">
         {isLoading ? (<Loader />):
         

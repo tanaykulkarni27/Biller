@@ -9,6 +9,9 @@ import Billing from './dashboard/Billing'
 import AddBill from './dashboard/AddBill'
 import Myacc from './dashboard/myacc'
 import ViewClient from './dashboard/view-client'
+import Calender from './dashboard/calender/page'
+import MattersPage from './dashboard/matters/page'
+import TasksPage from './dashboard/tasks/page'
 import ViewBill from './ViewBill/page'
 import ForgotPassword from './forgotpassword/Email'
 import ResetPassword from './forgotpassword/resetpassword'
@@ -42,13 +45,16 @@ function App() {
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/signup" element={<Signup />} />
          <Route element={<ProtectedRoute />}>
-          <Route path="/clients" element={<Clients />} />
-          <Route path="/dashboard/:client_name" element={<DashboardLayout />} >
-            <Route index element={<Navigate to="billing" replace />} />
-            <Route path="billing" element={<Billing />} />
-            <Route path="view-client" element={<ViewClient />} />
-            <Route path="addBill" element={<AddBill />} />
+          <Route path="/dashboard" element={<DashboardLayout />} >
             <Route path="myacc" element={<Myacc />} />
+            <Route index element={<Navigate to="myacc" replace />} />
+            <Route path="clients" element={<Clients />} />
+            <Route path="billing" element={<Billing />} />
+            <Route path="clients/view-client" element={<ViewClient />} />
+            <Route path="calendar" element={<Calender />} />
+            <Route path="matters" element={<MattersPage />} />
+            <Route path="tasks" element={<TasksPage />} />
+            <Route path="addBill" element={<AddBill />} />
             <Route path="bill" element={<ViewBill />} />
           </Route>
         

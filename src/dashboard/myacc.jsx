@@ -39,7 +39,7 @@ export default function MyAccount() {
   console.log(stats)
   return (
     // min-h-screen md:max-h-screen
-    <div className=" bg-gray-50 p-8 md:p-0 ">
+    <div className="p-4 md:p-8 bg-gray-50 p-8 md:p-0 ">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* HEADER */}

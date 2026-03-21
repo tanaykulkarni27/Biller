@@ -5,6 +5,7 @@ import aaxios from '@/hooks/aaxios';
 import Loader from '@/components/Loader';
 
 import {
+  ArrowLeft,
   Hash,
   MapPin,
   Building2,
@@ -58,18 +59,24 @@ export default function ViewClient() {
     setClient(form);
     setIsEditing(false);
     storage.remove('client');
-    nav('/clients');
+    nav('/dashboard/clients');
   };
 
   return (
-    <div className="bg-gray-50 p-4 sm:p-6 md:p-0">
+    <div className="bg-gray-50 p-4 sm:p-6 md:p-0 m-4 md:m-8">
       {isLoading && <Loader />}
       <div className="max-w-5xl mx-auto space-y-8">
         {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <h1 className="text-lg sm:text-2xl font-bold text-gray-800 whitespace-nowrap">
-            View Client
-          </h1>
+          <button
+            type="button"
+            onClick={() => nav(-1)}
+            className="inline-flex w-fit items-center gap-2 text-sm sm:text-base font-semibold transition hover:opacity-80"
+            style={{ color: themeColor, background: "transparent" }}
+          >
+            <ArrowLeft size={18} />
+            Go back
+          </button>
 
           <div className="flex flex-col md:flex-row md:items-center gap-2 sm:gap-3 w-full md:w-auto">
             {!isEditing ? (

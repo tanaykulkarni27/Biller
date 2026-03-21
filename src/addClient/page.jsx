@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 
 const themeColor = "#7367f0";
 
-export default function AddClientModal({ open, onClose, onSubmit,error }) {
+export default function AddClientModal({ open, onClose, onSubmit, error, loading = false }) {
   const [name, setName] = useState("");
   const [vendorId, setVendorId] = useState("");
   const [address, setAddress] = useState("");
@@ -12,15 +12,20 @@ export default function AddClientModal({ open, onClose, onSubmit,error }) {
 
   // Close on ESC
   useEffect(() => {
-    const handleEsc = (e) => e.key === "Escape" && onClose();
+    const handleEsc = (e) => {
+      if (e.key === "Escape" && !loading) {
+        onClose();
+      }
+    };
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
+  }, [loading, onClose]);
 
   if (!open) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (loading) return;
     if (!name || !vendorId || !address || !city || !pincode) return;
 
     onSubmit({
@@ -46,7 +51,7 @@ export default function AddClientModal({ open, onClose, onSubmit,error }) {
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-black/40"
-        onClick={onClose}
+        onClick={() => !loading && onClose()}
       />
 
       {/* Modal */}
@@ -58,7 +63,8 @@ export default function AddClientModal({ open, onClose, onSubmit,error }) {
             Add Client
           </h2>
           <button
-            onClick={onClose}
+            onClick={() => !loading && onClose()}
+            disabled={loading}
             className="p-2 rounded-full hover:bg-gray-100"
           >
             <X size={18} />
@@ -78,6 +84,7 @@ export default function AddClientModal({ open, onClose, onSubmit,error }) {
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. ABC Pvt Ltd"
               required
+              disabled={loading}
               className="mt-1 w-full px-4 py-2.5 rounded-lg border
               focus:outline-none focus:ring-1"
               style={{ '--tw-ring-color': themeColor }}
@@ -94,6 +101,7 @@ export default function AddClientModal({ open, onClose, onSubmit,error }) {
               onChange={(e) => setVendorId(e.target.value)}
               placeholder="e.g. VND-1023"
               required
+              disabled={loading}
               className="mt-1 w-full px-4 py-2.5 rounded-lg border
               focus:outline-none focus:ring-1"
               style={{ '--tw-ring-color': themeColor }}
@@ -108,6 +116,7 @@ export default function AddClientModal({ open, onClose, onSubmit,error }) {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="e.g. 102, Anant Gaurav Chambers, MG Road"
+              disabled={loading}
               className="mt-1 w-full px-4 py-2.5 rounded-lg border
               focus:outline-none focus:ring-1"
               style={{ '--tw-ring-color': themeColor }}
@@ -124,6 +133,7 @@ export default function AddClientModal({ open, onClose, onSubmit,error }) {
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="e.g. Pune"
+                disabled={loading}
                 className="mt-1 w-full px-4 py-2.5 rounded-lg border
                 focus:outline-none focus:ring-1"
                 style={{ '--tw-ring-color': themeColor }}
@@ -139,6 +149,7 @@ export default function AddClientModal({ open, onClose, onSubmit,error }) {
                 onChange={(e) => setPincode(e.target.value)}
                 placeholder="e.g. 411001"
                 inputMode="numeric"
+                disabled={loading}
                 className="mt-1 w-full px-4 py-2.5 rounded-lg border
                 focus:outline-none focus:ring-1"
                 style={{ '--tw-ring-color': themeColor }}
@@ -150,18 +161,27 @@ export default function AddClientModal({ open, onClose, onSubmit,error }) {
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50"
+              onClick={() => !loading && onClose()}
+              disabled={loading}
+              className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              className="px-5 py-2 rounded-lg text-white font-medium shadow-sm hover:shadow-md transition"
+              disabled={loading}
+              className="inline-flex min-w-[140px] items-center justify-center gap-2 px-5 py-2 rounded-lg text-white font-medium shadow-sm hover:shadow-md transition disabled:cursor-not-allowed disabled:opacity-80"
               style={{ backgroundColor: themeColor }}
             >
-              Create Client
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Client"
+              )}
             </button>
           </div>
         </form>
