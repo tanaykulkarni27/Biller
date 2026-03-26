@@ -11,7 +11,8 @@ export default function Billing() {
   const [isLoading, setIsLoading] = useState(false);
   useEffect(()=>{
     setIsLoading(true);
-    aaxios.get('/invoice',{params:{vendorId:storage.get('client').vendorId}}).then(res=>{
+    aaxios.get('/invoice').then(res=>{
+      console.log(res.data);
       setData(res.data);
     }).catch(err=>{});
     setIsLoading(false);
