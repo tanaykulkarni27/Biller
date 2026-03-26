@@ -38,18 +38,31 @@ function CalendarDay({ day, hasTask, taskName, handleViewTask }) {
   return (
     <div
       onMouseEnter={handleMouseEnter}
-      className="group relative z-0 min-h-28 overflow-visible rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition hover:z-30 hover:-translate-y-1 hover:border-[#7367f0]/35 hover:shadow-[0_16px_40px_rgba(115,103,240,0.14)]"
+        className={`group relative z-0 flex min-h-28 flex-col overflow-visible rounded-2xl border p-3 shadow-sm transition hover:z-30 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(115,103,240,0.14)] ${
+        hasTask
+          ? "border-[#7367f0]/20 bg-[radial-gradient(circle_at_top,_rgba(115,103,240,0.08),_transparent_42%),linear-gradient(180deg,#fcfcff_0%,#f7f8fe_45%,#f2f5fb_100%)] ring-1 ring-[#7367f0]/5 hover:border-[#7367f0]/35"
+          : "border-slate-200 bg-white hover:border-slate-300"
+      }`}
     >
-      <div className="flex items-start justify-between">
-        <span className="text-sm font-semibold text-slate-700">{day}</span>
+      <div className="flex flex-1 items-center justify-center">
+        <span
+          className={`text-3xl font-bold leading-none ${
+            hasTask ? "text-[#4f46d8]" : "text-slate-700"
+          }`}
+        >
+          {day}
+        </span>
+      </div>
+
+      <div className="flex justify-end">
         <span
           className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${
             hasTask
-              ? "bg-[#7367f0]/10 text-[#5f55e8]"
-              : "bg-slate-100 text-slate-400"
+              ? "bg-[#7367f0] text-white shadow-[0_8px_20px_rgba(115,103,240,0.28)]"
+              : "bg-slate-100 text-slate-500"
           }`}
         >
-          {hasTask ? "Task" : "Free"}
+          {hasTask ? "Scheduled" : "Open"}
         </span>
       </div>
 
@@ -57,12 +70,11 @@ function CalendarDay({ day, hasTask, taskName, handleViewTask }) {
       <div
         className={`
           pointer-events-none absolute top-2 z-40 rounded-2xl border border-slate-200 bg-white/95 p-4 hidden opacity-0 shadow-[0_22px_50px_rgba(15,23,42,0.18)] backdrop-blur transition duration-200 group-hover:pointer-events-auto group-hover:opacity-100 group-hover:block md:w-[250px]
-          bg-red-500
           ${hoverSide === "right" ? "left-full ml-2" : "right-full mr-2"}
         `}
       >
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-          {hasTask ? "Client Task" : "Availability"}
+          {hasTask ? "Scheduled Work" : "Day Status"}
         </p>
 
         <p className="mt-2 text-sm font-semibold text-slate-800">{taskName}</p>
@@ -77,7 +89,7 @@ function CalendarDay({ day, hasTask, taskName, handleViewTask }) {
           }`}
         >
           <Eye size={15} />
-          View Task
+          {hasTask ? "View Schedule" : "View Day"}
         </button>
       </div>
     </div>
@@ -139,7 +151,7 @@ export default function BillingCalendar() {
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const taskName = tasksByDate[day] || "No task scheduled";
+      const taskName = tasksByDate[day] || "No activity scheduled";
       const hasTask = Boolean(tasksByDate[day]);
 
       days.push(

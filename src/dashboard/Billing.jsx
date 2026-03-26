@@ -40,9 +40,9 @@ export default function Billing() {
                   className="border-t hover:bg-gray-50 transition"
                 >
                   <td className="px-6 py-4 flex items-center gap-3">
-                    <Avatar name={storage.get('client').name} size={36} />
+                    <Avatar name={item.clientName} size={36} />
                     <span className="font-medium text-gray-700">
-                      {storage.get('client').name}
+                      {item.clientName}
                     </span>
                   </td>
 

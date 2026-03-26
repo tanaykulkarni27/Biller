@@ -17,7 +17,7 @@ export default function Signup() {
     // console.log({ email, password })
      try {
       setIsLoading(true);
-    const response = await aaxios.post("/register", {
+    const response = await aaxios.post("/user/register", {
       name,
       email,
       password,

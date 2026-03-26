@@ -19,7 +19,7 @@ function Login() {
     // console.log({ email, password })
     try {
       setIsLoading(true);
-      const response = await aaxios.post("/login", {
+      const response = await aaxios.post("/user/login", {
         email,
         password,
       });

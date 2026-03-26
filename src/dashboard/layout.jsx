@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Home, Users, Receipt, PlusSquare, LogOut, Calendar, BriefcaseBusiness, ListTodo } from "lucide-react";
+import { Home, Users, Receipt, PlusSquare, Calendar, BriefcaseBusiness, ListTodo } from "lucide-react";
 
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
@@ -37,7 +37,6 @@ export default function DashboardLayout() {
         </h1>
 
         <nav className="flex flex-col gap-2">
-  
           <NavLink
             to="/dashboard/myacc"
             onClick={() => setOpen(false)}
@@ -63,32 +62,6 @@ export default function DashboardLayout() {
           >
             <Users size={18} />
             Clients
-          </NavLink>
-          <NavLink
-            to="/dashboard/billing"
-            onClick={() => setOpen(false)}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition
-              ${isActive
-                ? 'bg-[#7367f0]/10 text-[#7367f0]'
-                : 'text-gray-600 hover:bg-gray-100'}`
-            }
-          >
-            <Receipt size={18} />
-            Invoice
-          </NavLink>
-          <NavLink
-            to="/dashboard/calendar"
-            onClick={() => setOpen(false)}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition
-              ${isActive
-                ? 'bg-[#7367f0]/10 text-[#7367f0]'
-                : 'text-gray-600 hover:bg-gray-100'}`
-            }
-          >
-            <Calendar size={18} />
-            Calendar
           </NavLink>
           <NavLink
             to="/dashboard/matters"
@@ -117,6 +90,19 @@ export default function DashboardLayout() {
             Tasks
           </NavLink>
           <NavLink
+            to="/dashboard/billing"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition
+              ${isActive
+                ? 'bg-[#7367f0]/10 text-[#7367f0]'
+                : 'text-gray-600 hover:bg-gray-100'}`
+            }
+          >
+            <Receipt size={18} />
+            Invoice
+          </NavLink>
+          <NavLink
             to="/dashboard/addBill"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
@@ -128,6 +114,19 @@ export default function DashboardLayout() {
           >
             <PlusSquare size={18} />
             Add Invoice
+          </NavLink>
+          <NavLink
+            to="/dashboard/calendar"
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition
+              ${isActive
+                ? 'bg-[#7367f0]/10 text-[#7367f0]'
+                : 'text-gray-600 hover:bg-gray-100'}`
+            }
+          >
+            <Calendar size={18} />
+            Calendar
           </NavLink>
         </nav>
 
