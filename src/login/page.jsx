@@ -23,11 +23,10 @@ function Login() {
         email,
         password,
       });
-
-      localStorage.setItem("token", response.data.token);
+      console.log(response.data);
+      storage.set("token", response.data.token);
       storage.set("user", response.data.user);
-      storage.set("stats", response.data.stats);
-      // console.log(localStorage.getItem("token"));
+      storage.set("clients", response.data.clients);
       nav("/dashboard");
       setIsLoading(false);
     } catch (error) {
@@ -157,12 +156,12 @@ function Login() {
             </h2>
 
             <p className="text-sm text-gray-600 mt-3">
-              Your account is not verified. Please check your email for the
-              verification link.
+              Your account is not verified yet. Click on "Resend Link" to get
+              a verification link in your email.
             </p>
-            {/* Added Spam Note */}
             <p className="text-xs text-gray-500 mt-2">
-              If you don’t see the email, please check your spam or junk folder.
+              If you don’t see the email, please check your spam or junk
+              folder.
             </p>
             {resendStatus && (
               <p className="text-sm mt-3 text-green-600">{resendStatus}</p>

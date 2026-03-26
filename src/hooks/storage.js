@@ -9,6 +9,7 @@ export const storage = {
           : JSON.stringify(value);
 
       localStorage.setItem(PREFIX + key, data);
+      return true;
     } catch (err) {
       console.error("Storage set error:", err);
     }

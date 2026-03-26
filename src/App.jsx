@@ -16,10 +16,11 @@ import ViewBill from './ViewBill/page'
 import ForgotPassword from './forgotpassword/Email'
 import ResetPassword from './forgotpassword/resetpassword'
 import Signup from './signup'
+import {storage} from '@/hooks/storage';
 
 const ProtectedRoute = () => {
-  const token = localStorage.getItem("token");
-
+  const token = storage.get("token");
+  // console.log("Checking token in ProtectedRoute:", token); // Debug log
   // if not logged in, redirect to login
   if (!token) {
     return <Navigate to="/" replace />;

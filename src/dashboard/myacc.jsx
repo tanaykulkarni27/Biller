@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Avatar from "@/components/Avatar";
-import {storage} from "@/hooks/storage";
+import Loader from "@/components/Loader";
+import aaxios from "@/hooks/aaxios";
+import { storage } from "@/hooks/storage";
 import {
   Calendar,
   Mail,
@@ -26,8 +28,9 @@ const formatInr = (amount) =>
 
 export default function MyAccount() {
   const [filter, setFilter] = useState("1year");
+  const [userData, setUserData] = useState(storage.get("stats") || {});
+  const [isLoading, setIsLoading] = useState(true);
   const user = storage.get('user');
-  const stats = storage.get('stats');
   const invoiceStatsConfig = [
   { key: "totalInvoice", label: "Total Invoices" },
   { key: "paidInvoice", label: "Paid Invoices" },
@@ -36,10 +39,40 @@ export default function MyAccount() {
   { key: "amountReceived", label: "Amount Received" },
   { key: "amountPending", label: "Amount Pending" },
 ];
-  console.log(stats)
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchStats = async () => {
+      try {
+        setIsLoading(true);
+        const response = await aaxios.get("/user/stats");
+        // console.log(response.data);
+        
+        if (!isMounted) return;
+        setUserData(response.data);
+        
+      } catch (error) {
+        console.error("Failed to fetch user stats:", error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+
+    };
+
+    fetchStats();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     // min-h-screen md:max-h-screen
     <div className="p-4 md:p-8 bg-gray-50 p-8 md:p-0 ">
+      {isLoading && <Loader />}
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* HEADER */}
@@ -127,7 +160,7 @@ export default function MyAccount() {
                 className="text-2xl font-bold"
                 style={{ color: themeColor }}
               >
-                {stats[statConfig.key]}
+                {userData?.[statConfig.key] ?? 0}
               </div>
             </div>
           ))}
@@ -152,19 +185,25 @@ export default function MyAccount() {
                     Pending (INR)
                   </th>
                   <th className="px-6 py-3 text-sm font-medium text-gray-600 text-right">
-                    Receivables (INR)
+                    Received (INR)
+                  </th>
+                  <th className="px-6 py-3 text-sm font-medium text-gray-600 text-right">
+                    Total (INR)
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {sampleClientBusiness.map((row, index) => (
+                {userData.clients.map((row, index) => (
                   <tr key={row.client} className={index % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
-                    <td className="px-6 py-4 text-sm text-gray-800">{row.client}</td>
+                    <td className="px-6 py-4 text-sm text-gray-800">{row.clientName}</td>
                     <td className="px-6 py-4 text-sm font-medium text-right" style={{ color: themeColor }}>
-                      {formatInr(row.pendingInr)}
+                      {formatInr(row.pendingAmount)}
                     </td>
                     <td className="px-6 py-4 text-sm font-medium text-right" style={{ color: themeColor }}>
-                      {formatInr(row.receivablesInr)}
+                      {formatInr(row.paidAmount)}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-right" style={{ color: themeColor }}>
+                      {formatInr(row.totalAmount)}
                     </td>
                   </tr>
                 ))}
