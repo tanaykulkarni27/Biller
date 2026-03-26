@@ -41,32 +41,21 @@ export default function MyAccount() {
 ];
 
   useEffect(() => {
-    let isMounted = true;
-
     const fetchStats = async () => {
       try {
         setIsLoading(true);
         const response = await aaxios.get("/user/stats");
-        // console.log(response.data);
-        
-        if (!isMounted) return;
         setUserData(response.data);
-        
       } catch (error) {
         console.error("Failed to fetch user stats:", error);
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
 
     };
 
     fetchStats();
 
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   return (
