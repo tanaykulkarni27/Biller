@@ -28,7 +28,7 @@ const formatInr = (amount) =>
 
 export default function MyAccount() {
   const [filter, setFilter] = useState("1year");
-  const [userData, setUserData] = useState(storage.get("stats") || {});
+  const [userData, setUserData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const user = storage.get('user');
   const invoiceStatsConfig = [
@@ -50,6 +50,7 @@ export default function MyAccount() {
         console.error("Failed to fetch user stats:", error);
       } finally {
         setIsLoading(false);
+        console.log(userData);
       }
 
     };
@@ -182,7 +183,7 @@ export default function MyAccount() {
                 </tr>
               </thead>
               <tbody>
-                {userData.clients.map((row, index) => (
+                {userData.clients && userData.clients.map((row, index) => (
                   <tr key={row.client} className={index % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
                     <td className="px-6 py-4 text-sm text-gray-800">{row.clientName}</td>
                     <td className="px-6 py-4 text-sm font-medium text-right" style={{ color: themeColor }}>
