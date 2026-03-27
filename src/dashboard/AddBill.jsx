@@ -1,8 +1,12 @@
-import React, { useState,useEffect } from "react";
+import React, { useState } from "react";
 import { Trash2, Plus, Type, Hash, Layout, Save, X, Pen, AlignLeft, Calendar } from "lucide-react";
 import {storage} from "../hooks/storage";
 import aaxios from "../hooks/aaxios";
 export default function AddBill() {
+  const storedClients = Array.isArray(storage.get("clients"))
+    ? storage.get("clients")
+    : [];
+  const selectedClient = storage.get("client");
   const [allowEditColumns, setAllowEditColumns] = useState(false);
   const [columns, setColumns] = useState([
   { id: 1, name: "Date", type: "date" },
@@ -32,6 +36,9 @@ export default function AddBill() {
 
   const [invoiceNo, setInvoiceNo] = useState("");
   const [status, setStatus] = useState("PENDING");
+  const [vendorId, setVendorId] = useState(
+    selectedClient?.vendorId || storedClients[0]?.vendorId || ""
+  );
   const [invoiceDate, setInvoiceDate] = useState(
     new Date().toISOString().split("T")[0]
   );
@@ -44,21 +51,6 @@ export default function AddBill() {
     });
     setRows([...rows, emptyRow]);
   };
-
-useEffect(() => {
-  if (rows.length === 0 && columns.length > 0) {
-    const defaultRow = {};
-    columns.forEach((col) => {
-      defaultRow[col.name] =
-        col.name === "Date"
-          ? new Date().toISOString().split("T")[0]
-          : "";
-    });
-    setRows([defaultRow]);
-  }
-}, [columns]);
-
-
   // Update cell
   const updateCell = (rowIndex, colName, value) => {
     const updated = [...rows];
@@ -118,7 +110,7 @@ useEffect(() => {
 
   const submitInvoice = () => {
     const InvoiceData = {
-                          vendorId:storage.get('client')?storage.get('client').vendorId:null,
+                          vendorId: vendorId || null,
                           invoice_no : invoiceNo,
                           date : invoiceDate,
                           status,
@@ -129,7 +121,7 @@ useEffect(() => {
       alert("Please fill all required fields");
       return;
     }
-    aaxios.post('/invoice/add', InvoiceData).then(res=>{
+    aaxios.post('/invoice/add', InvoiceData).then(()=>{
       alert("Invoice created successfully");
       window.history.back();
     }).catch(err=>{
@@ -137,7 +129,6 @@ useEffect(() => {
       console.log(err.response?.data?.message  || "Error creating invoice");
     });
   };
-  const isNumeric = false;
   return (
     <>
       <div className="md:hidden min-h-screen bg-white px-6 py-12 flex items-center justify-center">
@@ -426,6 +417,28 @@ useEffect(() => {
         )}
         
         <div className="my-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Client
+            </label>
+            <select
+              value={vendorId}
+              onChange={(e) => setVendorId(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2"
+              style={{ "--tw-ring-color": themeColor }}
+            >
+              <option value="">Select client</option>
+              {storedClients.map((client) => (
+                <option
+                  key={client.vendorId || client.name}
+                  value={client.vendorId || ""}
+                >
+                  {client.name || client.vendorId || "Unnamed client"}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Invoice Number */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

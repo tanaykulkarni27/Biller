@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   BriefcaseBusiness,
   Eye,
+  Loader2,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -12,47 +13,13 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-
-const initialMatters = [
-  {
-    caseId: "MAT-2026-001",
-    title: "Acme Corp vs. Northfield Developers",
-    clientName: "Acme Corp",
-    caseType: "Civil Litigation",
-    courtName: "Delhi High Court",
-    status: "In Progress",
-    priority: "High",
-  },
-  {
-    caseId: "MAT-2026-002",
-    title: "Priya Sharma Bail Petition",
-    clientName: "Priya Sharma",
-    caseType: "Criminal",
-    courtName: "Sessions Court",
-    status: "Hearing Scheduled",
-    priority: "Urgent",
-  },
-  {
-    caseId: "MAT-2026-003",
-    title: "Vertex LLP Contract Dispute",
-    clientName: "Vertex LLP",
-    caseType: "Commercial",
-    courtName: "Commercial Court",
-    status: "Drafting",
-    priority: "Medium",
-  },
-  {
-    caseId: "MAT-2026-004",
-    title: "Rao Family Property Appeal",
-    clientName: "Rao Family",
-    caseType: "Property",
-    courtName: "District Court",
-    status: "Pending Review",
-    priority: "Low",
-  },
-];
+import aaxios from "@/hooks/aaxios";
+import { storage } from "@/hooks/storage";
 
 const priorityClasses = {
+  high: "bg-rose-100 text-rose-700",
+  medium: "bg-amber-100 text-amber-700",
+  low: "bg-emerald-100 text-emerald-700",
   Urgent: "bg-rose-100 text-rose-700",
   High: "bg-amber-100 text-amber-700",
   Medium: "bg-sky-100 text-sky-700",
@@ -60,54 +27,88 @@ const priorityClasses = {
 };
 
 const statusClasses = {
-  "In Progress": "bg-[#7367f0]/10 text-[#5b53d6]",
-  "Hearing Scheduled": "bg-cyan-100 text-cyan-700",
-  Drafting: "bg-slate-100 text-slate-700",
-  "Pending Review": "bg-orange-100 text-orange-700",
+  Pending: "bg-amber-100 text-amber-700",
+  in_progress: "bg-[#7367f0]/10 text-[#5b53d6]",
+  review: "bg-cyan-100 text-cyan-700",
+  closed: "bg-slate-100 text-slate-700",
 };
 
 const columns = [
-  { key: "caseId", label: "Case Id" },
-  { key: "title", label: "Title" },
-  { key: "clientName", label: "Client Name" },
-  { key: "status", label: "Status" },
-  { key: "priority", label: "Priority" },
-  { key: "caseType", label: "Case Type" },
-  { key: "courtName", label: "Court Name" },
+  { key: "case_id", label: "Case Id" },
+  { key: "case_name", label: "Title" },
+  { key: "case_status", label: "Status" },
+  { key: "case_priority", label: "Priority" },
+  { key: "case_type", label: "Case Type" },
 ];
 
 export default function MattersPage() {
-  const [matters, setMatters] = useState(initialMatters);
+  const [matters, setMatters] = useState([]);
   const [selectedMatterId, setSelectedMatterId] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [isFetching, setIsFetching] = useState(true);
+  const [error, setError] = useState("");
+  const vendorId = storage.get("client")?.vendorId || "";
 
   const selectedMatter = useMemo(
-    () => matters.find((matter) => matter.caseId === selectedMatterId) ?? null,
+    () => matters.find((matter) => matter.case_id === selectedMatterId) ?? null,
     [matters, selectedMatterId]
   );
 
+  useEffect(() => {
+    setIsFetching(true);
+    aaxios
+      .get("/matters", {
+        params: vendorId ? { vendorId } : undefined,
+      })
+      .then((response) => {
+        const responseData = Array.isArray(response.data)
+          ? response.data
+          : response.data?.data || [];
+        setMatters(responseData.map(normalizeMatter));
+      })
+      .catch((fetchError) => {
+        setError(
+          fetchError.response?.data?.message || "Failed to fetch matters."
+        );
+      })
+      .finally(() => {
+        setIsFetching(false);
+      });
+  }, [vendorId]);
+
   const handleView = (matter) => {
-    setSelectedMatterId(matter.caseId);
+    setSelectedMatterId(matter.case_id);
     setIsDrawerOpen(true);
     setOpenMenuId(null);
   };
 
-  const handleDelete = (matterId) => {
-    setMatters((currentMatters) => {
-      const updatedMatters = currentMatters.filter(
-        (matter) => matter.caseId !== matterId
+  const handleDelete = async (matter) => {
+    try {
+      await aaxios.delete(`/matters/${encodeURIComponent(matter.case_id)}`, {
+        params: matter.vendorId ? { vendorId: matter.vendorId } : undefined,
+        data: matter.vendorId ? { vendorId: matter.vendorId } : undefined,
+      });
+
+      setMatters((currentMatters) => {
+        const updatedMatters = currentMatters.filter(
+          (currentMatter) => currentMatter.case_id !== matter.case_id
+        );
+
+        if (selectedMatterId === matter.case_id) {
+          setSelectedMatterId(null);
+          setIsDrawerOpen(false);
+        }
+
+        return updatedMatters;
+      });
+    } catch (deleteError) {
+      setError(
+        deleteError.response?.data?.message || "Failed to delete matter."
       );
-
-      if (selectedMatterId === matterId) {
-        setSelectedMatterId(null);
-        setIsDrawerOpen(false);
-      }
-
-      return updatedMatters;
-    });
-
-    setOpenMenuId(null);
+    } finally {
+      setOpenMenuId(null);
+    }
   };
 
   return (
@@ -127,7 +128,7 @@ export default function MattersPage() {
           <div className="flex flex-wrap items-center gap-3">
             <div className="inline-flex items-center gap-2 rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-sm font-medium text-slate-600 shadow-[0_12px_30px_rgba(15,23,42,0.06)] backdrop-blur">
               <Search size={16} className="text-[#7367f0]" />
-              {matters.length} active matters
+              {isFetching ? "Loading matters..." : `${matters.length} active matters`}
             </div>
 
             <Link
@@ -142,7 +143,7 @@ export default function MattersPage() {
 
         <div className="relative min-h-0 flex-1">
           <div className="flex h-full max-w-full min-w-0 flex-col overflow-hidden rounded-[32px] border border-white/70 bg-white/85 shadow-[0_20px_50px_rgba(15,23,42,0.08)] backdrop-blur">
-            <div className="flex items-center justify-between border-b border-slate-200/80 px-6 py-5">
+            <div className="relative z-0 flex items-center justify-between border-b border-slate-200/80 px-6 py-5">
               <div className="flex items-center gap-3">
                 <div className="rounded-2xl bg-[#7367f0]/10 p-3 text-[#7367f0]">
                   <BriefcaseBusiness size={20} />
@@ -158,68 +159,79 @@ export default function MattersPage() {
               </div>
             </div>
 
-            <div className="min-h-0 max-w-full min-w-0 flex-1 overflow-auto">
-              <div className="hidden min-w-[1280px] md:block">
-                <div className="grid grid-cols-[140px_minmax(220px,2.2fr)_minmax(150px,1.5fr)_minmax(140px,1.4fr)_minmax(170px,1.6fr)_minmax(140px,1.3fr)_minmax(110px,1fr)_88px] border-b border-slate-200/80 bg-slate-50/80 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <div className="relative z-10 min-h-0 max-w-full min-w-0 flex-1 overflow-auto">
+              {isFetching ? (
+                <div className="flex h-full min-h-[320px] items-center justify-center gap-3 text-sm font-medium text-[#5b53d6]">
+                  <Loader2 size={18} className="animate-spin" />
+                  Loading matters...
+                </div>
+              ) : error ? (
+                <div className="m-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                  {error}
+                </div>
+              ) : matters.length === 0 ? (
+                <div className="flex h-full min-h-[320px] items-center justify-center px-6 text-center text-sm font-medium text-slate-500">
+                  No matters found yet. Use Add matter to create the first one.
+                </div>
+              ) : (
+                <>
+              <div className="hidden min-w-[1040px] md:block">
+                <div className="grid grid-cols-[140px_minmax(260px,2.4fr)_minmax(140px,1.4fr)_minmax(170px,1.6fr)_minmax(140px,1.3fr)_88px] border-b border-slate-200/80 bg-slate-50/80 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                   {columns.map((column) => (
                     <div
                       key={column.key}
                       className={`px-6 py-4 ${
-                        column.key === "caseId" ? "whitespace-nowrap" : ""
+                        column.key === "case_id" ? "whitespace-nowrap" : ""
                       }`}
                     >
                       {column.label}
                     </div>
                   ))}
-                  <div className="sticky right-0 z-10 bg-slate-50/95 px-4 py-4 text-center shadow-[-10px_0_18px_rgba(248,250,252,0.95)]">
+                  <div className="sticky right-0 z-20 bg-slate-50/95 px-4 py-4 text-center shadow-[-10px_0_18px_rgba(248,250,252,0.95)]">
                     Actions
                   </div>
                 </div>
 
-                {matters.map((matter, index) => (
+                {matters.map((matter) => (
                   <div
-                    key={matter.caseId}
-                    className="grid grid-cols-[140px_minmax(220px,2.2fr)_minmax(150px,1.5fr)_minmax(140px,1.4fr)_minmax(170px,1.6fr)_minmax(140px,1.3fr)_minmax(110px,1fr)_88px] items-center border-b border-slate-100 text-sm text-slate-700 transition hover:bg-[#7367f0]/[0.03]"
+                    key={matter.case_id}
+                    className="grid grid-cols-[140px_minmax(260px,2.4fr)_minmax(140px,1.4fr)_minmax(170px,1.6fr)_minmax(140px,1.3fr)_88px] items-center border-b border-slate-100 text-sm text-slate-700 transition hover:bg-[#7367f0]/[0.03]"
                   >
                     <div className="whitespace-nowrap px-6 py-5 font-semibold text-slate-900">
-                      {matter.caseId}
+                      {matter.case_id}
                     </div>
-                    <div className="px-6 py-5">{matter.title}</div>
-                    <div className="px-6 py-5">{matter.clientName}</div>
+                    <div className="px-6 py-5">{matter.case_name}</div>
                     <div className="px-6 py-5">
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                          statusClasses[matter.status]
+                          statusClasses[matter.case_status] || "bg-slate-100 text-slate-700"
                         }`}
                       >
-                        {matter.status}
+                        {formatCaseStatus(matter.case_status)}
                       </span>
                     </div>
                     <div className="px-6 py-5">
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                          priorityClasses[matter.priority]
+                          priorityClasses[matter.case_priority] || "bg-slate-100 text-slate-700"
                         }`}
                       >
-                        {matter.priority}
+                        {formatCasePriority(matter.case_priority)}
                       </span>
                     </div>
-                    <div className="px-6 py-5">{matter.caseType}</div>
-                    <div className="px-6 py-5">{matter.courtName}</div>
-                    <div className="sticky right-0 z-10 bg-white/95 px-4 py-5 shadow-[-10px_0_18px_rgba(255,255,255,0.95)]">
+                    <div className="px-6 py-5">{matter.case_type}</div>
+                    <div className="sticky right-0 z-20 bg-white/95 px-4 py-5 shadow-[-10px_0_18px_rgba(255,255,255,0.95)]">
                       <MatterActions
                         matter={matter}
                         onView={handleView}
                         onDelete={handleDelete}
-                        isOpen={openMenuId === matter.caseId}
+                        isOpen={openMenuId === matter.case_id}
                         onToggleMenu={() =>
                           setOpenMenuId((currentId) =>
-                            currentId === matter.caseId ? null : matter.caseId
+                            currentId === matter.case_id ? null : matter.case_id
                           )
                         }
-                        menuPlacement={
-                          index >= matters.length - 2 ? "up-left" : "down-left"
-                        }
+                        menuPlacement="down-left"
                       />
                     </div>
                   </div>
@@ -227,9 +239,9 @@ export default function MattersPage() {
               </div>
 
               <div className="space-y-4 p-4 md:hidden">
-                {matters.map((matter, index) => (
+                {matters.map((matter) => (
                   <article
-                    key={matter.caseId}
+                    key={matter.case_id}
                     className="rounded-[24px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_12px_30px_rgba(15,23,42,0.06)]"
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -238,36 +250,39 @@ export default function MattersPage() {
                           Case Id
                         </p>
                         <p className="mt-1 text-sm font-semibold text-slate-900">
-                          {matter.caseId}
+                          {matter.case_id}
                         </p>
                       </div>
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                          priorityClasses[matter.priority]
+                          priorityClasses[matter.case_priority] || "bg-slate-100 text-slate-700"
                         }`}
                       >
-                        {matter.priority}
+                        {matter.case_priority}
                       </span>
                     </div>
 
                     <h3 className="mt-4 text-base font-semibold text-slate-900">
-                      {matter.title}
+                      {matter.case_name}
                     </h3>
 
                     <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-                      <MatterField label="Client Name" value={matter.clientName} />
-                      <MatterField label="Case Type" value={matter.caseType} />
-                      <MatterField label="Court Name" value={matter.courtName} />
+                      <MatterField
+                        label="Description"
+                        value={matter.case_description}
+                        className="col-span-2"
+                      />
+                      <MatterField label="Case Type" value={matter.case_type} />
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                           Status
                         </p>
                         <span
                           className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                            statusClasses[matter.status]
+                            statusClasses[matter.case_status] || "bg-slate-100 text-slate-700"
                           }`}
                         >
-                          {matter.status}
+                          {formatCaseStatus(matter.case_status)}
                         </span>
                       </div>
                     </div>
@@ -277,20 +292,20 @@ export default function MattersPage() {
                         matter={matter}
                         onView={handleView}
                         onDelete={handleDelete}
-                        isOpen={openMenuId === matter.caseId}
+                        isOpen={openMenuId === matter.case_id}
                         onToggleMenu={() =>
                           setOpenMenuId((currentId) =>
-                            currentId === matter.caseId ? null : matter.caseId
+                            currentId === matter.case_id ? null : matter.case_id
                           )
                         }
-                        menuPlacement={
-                          index >= matters.length - 1 ? "up-left" : "down-left"
-                        }
+                        menuPlacement="down-left"
                       />
                     </div>
                   </article>
                 ))}
               </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -306,71 +321,78 @@ export default function MattersPage() {
       )}
 
       <aside
-        className={`fixed right-0 top-0 z-50 h-full w-full max-w-md border-l border-white/70 bg-white/95 p-6 shadow-[-24px_0_60px_rgba(15,23,42,0.18)] backdrop-blur transition-transform duration-300 ${
+        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col overflow-hidden border-l border-white/70 bg-white/95 shadow-[-24px_0_60px_rgba(15,23,42,0.18)] backdrop-blur transition-transform duration-300 ${
           isDrawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {selectedMatter ? (
           <>
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7367f0]">
-                  Matter Details
-                </p>
-                <h2 className="mt-2 text-xl font-semibold text-slate-900">
-                  {selectedMatter.title}
-                </h2>
-                <p className="mt-2 text-sm text-slate-500">
-                  Opened from the 3-dot actions menu.
-                </p>
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7367f0]">
+                    Matter Details
+                  </p>
+                  <h2 className="mt-2 text-xl font-semibold text-slate-900">
+                    {selectedMatter.case_name}
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Opened from the 3-dot actions menu.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsDrawerOpen(false)}
+                  className="rounded-full border border-slate-200 p-2 text-slate-500 transition hover:border-slate-300 hover:text-slate-700"
+                  aria-label="Close matter details"
+                >
+                  <X size={16} />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsDrawerOpen(false)}
-                className="rounded-full border border-slate-200 p-2 text-slate-500 transition hover:border-slate-300 hover:text-slate-700"
-                aria-label="Close matter details"
-              >
-                <X size={16} />
-              </button>
-            </div>
 
-            <div className="mt-6 flex flex-wrap gap-2">
+              <div className="mt-6 flex flex-wrap gap-2">
+                <span
+                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                    statusClasses[selectedMatter.case_status] || "bg-slate-100 text-slate-700"
+                  }`}
+                >
+                  {formatCaseStatus(selectedMatter.case_status)}
+                </span>
               <span
                 className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                  statusClasses[selectedMatter.status]
+                  priorityClasses[selectedMatter.case_priority] || "bg-slate-100 text-slate-700"
                 }`}
               >
-                {selectedMatter.status}
-              </span>
-              <span
-                className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                  priorityClasses[selectedMatter.priority]
-                }`}
-              >
-                {selectedMatter.priority}
+                {formatCasePriority(selectedMatter.case_priority)}
               </span>
             </div>
 
-            <div className="mt-6 space-y-4">
-              <SidebarField label="Case Id" value={selectedMatter.caseId} />
-              <SidebarField
-                label="Client Name"
-                value={selectedMatter.clientName}
-              />
-              <SidebarField label="Case Type" value={selectedMatter.caseType} />
-              <SidebarField label="Court Name" value={selectedMatter.courtName} />
+              <div className="mt-6 space-y-4 pb-6">
+                <SidebarField
+                  label="Vendor Id"
+                  value={selectedMatter.vendorId || "Not provided"}
+                />
+                <SidebarField label="Case Id" value={selectedMatter.case_id} />
+                <SidebarField label="Description" value={selectedMatter.case_description} />
+                <SidebarField label="Case Type" value={selectedMatter.case_type} />
+                <SidebarField
+                  label="Filing Date"
+                  value={selectedMatter.case_filing_date || "Not provided"}
+                />
+              </div>
             </div>
-
-            <Link
-              to={`/dashboard/matters/add?${createMatterQuery(selectedMatter)}`}
-              className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#7367f0] px-4 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(115,103,240,0.28)] transition hover:bg-[#6658ef]"
-            >
-              <Pencil size={16} />
-              Edit matter
-            </Link>
+            <div className="border-t border-slate-200/80 bg-white/95 px-6 py-5">
+              <Link
+                to={`/dashboard/matters/add?${createMatterQuery(selectedMatter)}`}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#7367f0] px-4 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(115,103,240,0.28)] transition hover:bg-[#6658ef]"
+              >
+                <Pencil size={16} />
+                Edit matter
+              </Link>
+            </div>
           </>
         ) : (
-          <div className="flex h-full min-h-[280px] flex-col items-center justify-center rounded-[24px] border border-dashed border-slate-200 bg-slate-50/70 px-6 text-center">
+          <div className="m-6 flex h-full min-h-[280px] flex-col items-center justify-center rounded-[24px] border border-dashed border-slate-200 bg-slate-50/70 px-6 text-center">
             <div className="rounded-2xl bg-[#7367f0]/10 p-4 text-[#7367f0]">
               <Eye size={22} />
             </div>
@@ -398,23 +420,23 @@ function MatterActions({
 }) {
   const menuPositionClasses =
     menuPlacement === "up-left"
-      ? "bottom-full right-full mb-2"
-      : "right-full top-full mt-2";
+      ? "bottom-full right-0 mb-2"
+      : "right-0 top-full mt-2";
 
   return (
-    <div className={`relative flex justify-center ${isOpen ? "z-50" : "z-10"}`}>
+    <div className={`relative flex justify-center ${isOpen ? "z-[80]" : "z-10"}`}>
       <button
         type="button"
         onClick={onToggleMenu}
         className="inline-flex items-center justify-center rounded-xl border border-slate-200 p-2 text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
-        aria-label={`Open actions for ${matter.title}`}
+        aria-label={`Open actions for ${matter.case_name}`}
       >
         <MoreHorizontal size={16} />
       </button>
 
       {isOpen && (
         <div
-          className={`absolute z-[60] mr-2 min-w-[160px] rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_16px_36px_rgba(15,23,42,0.14)] ${menuPositionClasses}`}
+          className={`absolute z-[90] mr-2 min-w-[160px] rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_16px_36px_rgba(15,23,42,0.14)] ${menuPositionClasses}`}
         >
           <button
             type="button"
@@ -427,7 +449,7 @@ function MatterActions({
 
           <button
             type="button"
-            onClick={() => onDelete(matter.caseId)}
+            onClick={() => onDelete(matter)}
             className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-600 transition hover:bg-rose-50 hover:text-rose-700"
           >
             <Trash2 size={14} />
@@ -439,9 +461,9 @@ function MatterActions({
   );
 }
 
-function MatterField({ label, value }) {
+function MatterField({ label, value, className = "" }) {
   return (
-    <div>
+    <div className={className}>
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
         {label}
       </p>
@@ -463,4 +485,55 @@ function SidebarField({ label, value }) {
 
 function createMatterQuery(matter) {
   return new URLSearchParams(matter).toString();
+}
+
+function formatCaseStatus(value) {
+  const statusLabels = {
+    Pending: "Pending",
+    in_progress: "In Progress",
+    review: "Review",
+    closed: "Closed",
+  };
+
+  return statusLabels[value] || value || "Not provided";
+}
+
+function formatCasePriority(value) {
+  const priorityLabels = {
+    urgent: "Urgent",
+    high: "High",
+    medium: "Medium",
+    low: "Low",
+    Urgent: "Urgent",
+    High: "High",
+    Medium: "Medium",
+    Low: "Low",
+  };
+
+  return priorityLabels[value] || value || "Not provided";
+}
+
+function normalizeMatter(matter) {
+  return {
+    vendorId: matter.vendorId || "",
+    case_id: matter.case_id || matter.caseId || "",
+    case_name: matter.case_name || matter.title || "",
+    case_description:
+      matter.case_description || matter.description || "No description provided",
+    case_type: matter.case_type || matter.caseType || "",
+    case_status: matter.case_status || matter.status || "",
+    case_filing_date: formatDateForInput(
+      matter.case_filing_date || matter.caseFilingDate || ""
+    ),
+    case_priority: matter.case_priority || matter.priority || "",
+    createdAt: matter.createdAt,
+    updatedAt: matter.updatedAt,
+  };
+}
+
+function formatDateForInput(value) {
+  if (!value) return "";
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) return value;
+  return parsedDate.toISOString().split("T")[0];
 }

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import Avatar from "@/components/Avatar";
 import { useNavigate } from "react-router-dom";
-import { Loader2, LogOut, Plus, Turtle } from "lucide-react";
+import { ArrowUpRight, Loader2, LogOut, Plus, Turtle } from "lucide-react";
 import AddClient from "@/addClient/page";
 import aaxios from "@/hooks/aaxios";
 import { storage } from "@/hooks/storage";
@@ -16,7 +16,6 @@ export default function Clients() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   useEffect(() => {
-    setIsFetching(true);
     aaxios
       .get("/client")
       .then((res) => {
@@ -132,12 +131,19 @@ export default function Clients() {
               <button
                 key={client.name}
                 onClick={() => handleSelectClient(client)}
-                className="group flex flex-col items-center gap-3 rounded-[24px] border border-white/70 bg-white/90 p-5 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-[#7367f0]/40 hover:shadow-[0_18px_38px_rgba(115,103,240,0.16)] focus:outline-none focus:ring-2 focus:ring-[#7367f0]/20"
+                className="group relative overflow-hidden flex flex-col items-center gap-3 rounded-[24px] border border-white/70 bg-white/90 p-5 shadow-[0_12px_30px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-1 hover:border-[#7367f0]/40 hover:shadow-[0_18px_38px_rgba(115,103,240,0.16)] focus:outline-none focus:ring-2 focus:ring-[#7367f0]/20"
               >
-                <Avatar name={client.name} size={48} />
-                <span className="text-sm font-semibold text-slate-700 transition group-hover:text-[#5b53d6]">
+                <div className="pointer-events-none absolute inset-0 rounded-[24px] bg-[linear-gradient(180deg,rgba(15,23,42,0)_0%,rgba(15,23,42,0.12)_100%)] opacity-0 transition-all duration-200 group-hover:opacity-100" />
+                <div className="pointer-events-none absolute right-4 top-4 z-10 flex h-10 w-10 translate-y-1 items-center justify-center rounded-full bg-slate-900/85 text-white opacity-0 shadow-[0_10px_24px_rgba(15,23,42,0.22)] transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+                  <ArrowUpRight size={18} />
+                </div>
+                <div className="relative z-0 transition-all duration-200 group-hover:scale-95 group-hover:opacity-80">
+                  <Avatar name={client.name} size={48} />
+                </div>
+                <span className="relative z-0 text-sm font-semibold text-slate-700 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:text-[#5b53d6]">
                   {client.name}
                 </span>
+                <div className="pointer-events-none absolute inset-x-5 bottom-4 h-px origin-left scale-x-0 bg-gradient-to-r from-[#5b53d6] via-[#7367f0] to-transparent opacity-0 transition-all duration-200 group-hover:scale-x-100 group-hover:opacity-100" />
               </button>
             ))}
           </div>

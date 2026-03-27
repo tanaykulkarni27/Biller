@@ -27,6 +27,7 @@ function Login() {
       storage.set("token", response.data.token);
       storage.set("user", response.data.user);
       storage.set("clients", response.data.clients);
+      console.log(response.data.clients);
       nav("/dashboard");
       setIsLoading(false);
     } catch (error) {
