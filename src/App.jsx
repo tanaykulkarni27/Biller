@@ -11,6 +11,7 @@ import Myacc from './dashboard/myacc'
 import ViewClient from './dashboard/view-client'
 import Calender from './dashboard/calender/page'
 import MattersPage from './dashboard/matters/page'
+import AddMatterPage from './dashboard/matters/add/page'
 import TasksPage from './dashboard/tasks/page'
 import ViewBill from './ViewBill/page'
 import ForgotPassword from './forgotpassword/Email'
@@ -54,6 +55,7 @@ function App() {
             <Route path="clients/view-client" element={<ViewClient />} />
             <Route path="calendar" element={<Calender />} />
             <Route path="matters" element={<MattersPage />} />
+            <Route path="matters/add" element={<AddMatterPage />} />
             <Route path="tasks" element={<TasksPage />} />
             <Route path="addBill" element={<AddBill />} />
             <Route path="bill" element={<ViewBill />} />
