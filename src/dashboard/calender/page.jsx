@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, Eye, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import aaxios from "@/hooks/aaxios";
 import { storage } from "@/hooks/storage";
 
 const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -19,13 +20,18 @@ const monthNames = [
   "December",
 ];
 
-// import { Eye } from "lucide-react";
-
-function CalendarDay({ day, hasTask, taskName, handleViewTask }) {
+function CalendarDay({ day, tasks, handleViewTask }) {
   const [hoverSide, setHoverSide] = useState("right");
+  const hasTask = tasks.length > 0;
+  const primaryTaskLabel =
+    tasks.length === 0
+      ? "No activity scheduled"
+      : tasks.length === 1
+        ? tasks[0].title
+        : `${tasks.length} tasks scheduled`;
 
-  const handleMouseEnter = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
+  const handleMouseEnter = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
     const spaceRight = window.innerWidth - rect.right;
 
     if (spaceRight < 260) {
@@ -38,7 +44,7 @@ function CalendarDay({ day, hasTask, taskName, handleViewTask }) {
   return (
     <div
       onMouseEnter={handleMouseEnter}
-        className={`group relative z-0 flex min-h-28 flex-col overflow-visible rounded-2xl border p-3 shadow-sm transition hover:z-30 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(115,103,240,0.14)] ${
+      className={`group relative z-0 flex min-h-28 flex-col overflow-visible rounded-2xl border p-3 shadow-sm transition hover:z-30 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(115,103,240,0.14)] ${
         hasTask
           ? "border-[#7367f0]/20 bg-[radial-gradient(circle_at_top,_rgba(115,103,240,0.08),_transparent_42%),linear-gradient(180deg,#fcfcff_0%,#f7f8fe_45%,#f2f5fb_100%)] ring-1 ring-[#7367f0]/5 hover:border-[#7367f0]/35"
           : "border-slate-200 bg-white hover:border-slate-300"
@@ -62,14 +68,13 @@ function CalendarDay({ day, hasTask, taskName, handleViewTask }) {
               : "bg-slate-100 text-slate-500"
           }`}
         >
-          {hasTask ? "Scheduled" : "Open"}
+          {hasTask ? `${tasks.length} Task${tasks.length > 1 ? "s" : ""}` : "Open"}
         </span>
       </div>
 
-      {/* Hover Card */}
       <div
         className={`
-          pointer-events-none absolute top-2 z-40 rounded-2xl border border-slate-200 bg-white/95 p-4 hidden opacity-0 shadow-[0_22px_50px_rgba(15,23,42,0.18)] backdrop-blur transition duration-200 group-hover:pointer-events-auto group-hover:opacity-100 group-hover:block md:w-[250px]
+          pointer-events-none absolute top-2 z-40 hidden rounded-2xl border border-slate-200 bg-white/95 p-4 opacity-0 shadow-[0_22px_50px_rgba(15,23,42,0.18)] backdrop-blur transition duration-200 group-hover:block group-hover:pointer-events-auto group-hover:opacity-100 md:w-[250px]
           ${hoverSide === "right" ? "left-full ml-2" : "right-full mr-2"}
         `}
       >
@@ -77,11 +82,27 @@ function CalendarDay({ day, hasTask, taskName, handleViewTask }) {
           {hasTask ? "Scheduled Work" : "Day Status"}
         </p>
 
-        <p className="mt-2 text-sm font-semibold text-slate-800">{taskName}</p>
+        <p className="mt-2 text-sm font-semibold text-slate-800">{primaryTaskLabel}</p>
+
+        {hasTask ? (
+          <div className="mt-3 space-y-2">
+            {tasks.slice(0, 3).map((task) => (
+              <div key={task.task_id} className="rounded-xl bg-slate-50 px-3 py-2">
+                <p className="text-sm font-medium text-slate-700">{task.title}</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {formatTaskStatus(task.status)} • {formatTaskPriority(task.priority)}
+                </p>
+              </div>
+            ))}
+            {tasks.length > 3 ? (
+              <p className="text-xs text-slate-500">+{tasks.length - 3} more tasks</p>
+            ) : null}
+          </div>
+        ) : null}
 
         <button
           type="button"
-          onClick={() => handleViewTask(day)}
+          onClick={() => handleViewTask(tasks)}
           className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition ${
             hasTask
               ? "bg-[#7367f0] text-white hover:bg-[#6256ef]"
@@ -89,7 +110,7 @@ function CalendarDay({ day, hasTask, taskName, handleViewTask }) {
           }`}
         >
           <Eye size={15} />
-          {hasTask ? "View Schedule" : "View Day"}
+          {hasTask ? "View Tasks" : "View Tasks Page"}
         </button>
       </div>
     </div>
@@ -98,43 +119,71 @@ function CalendarDay({ day, hasTask, taskName, handleViewTask }) {
 
 export default function BillingCalendar() {
   const navigate = useNavigate();
-  const client = storage.get("client");
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [tasks, setTasks] = useState([]);
+  const [isFetching, setIsFetching] = useState(true);
+  const [error, setError] = useState("");
+  const vendorId = storage.get("client")?.vendorId || "";
+
+  useEffect(() => {
+    aaxios
+      .get("/tasks", {
+        params: vendorId ? { vendorId } : undefined,
+      })
+      .then((response) => {
+        const responseData = Array.isArray(response.data)
+          ? response.data
+          : response.data?.data || [];
+        setTasks(responseData.map(normalizeTask));
+      })
+      .catch((fetchError) => {
+        setError(fetchError.response?.data?.message || "Failed to fetch tasks.");
+      })
+      .finally(() => {
+        setIsFetching(false);
+      });
+  }, [vendorId]);
 
   const tasksByDate = useMemo(() => {
-    const clientLabel = client?.name || "Client";
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
 
-    return {
-      3: `${clientLabel} onboarding review`,
-      8: `${clientLabel} invoice follow-up`,
-      14: `${clientLabel} compliance check`,
-      19: `${clientLabel} monthly billing`,
-      24: `${clientLabel} payment reminder`,
-      28: `${clientLabel} account summary`,
-    };
-  }, [client?.name, currentDate]);
+    return tasks.reduce((groupedTasks, task) => {
+      if (!task.task_date) return groupedTasks;
+
+      const taskDate = new Date(task.task_date);
+      if (Number.isNaN(taskDate.getTime())) return groupedTasks;
+      if (taskDate.getFullYear() !== year || taskDate.getMonth() !== month) {
+        return groupedTasks;
+      }
+
+      const day = taskDate.getDate();
+      if (!groupedTasks[day]) {
+        groupedTasks[day] = [];
+      }
+
+      groupedTasks[day].push(task);
+      return groupedTasks;
+    }, {});
+  }, [currentDate, tasks]);
 
   const prevMonth = () => {
     setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1),
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
     );
   };
 
   const nextMonth = () => {
     setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
     );
   };
 
-  const handleViewTask = (day) => {
-    navigate("/dashboard/billing", {
+  const handleViewTask = (dayTasks) => {
+    navigate("/dashboard/tasks", {
       state: {
-        taskDate: new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth(),
-          day,
-        ).toISOString(),
-        taskName: tasksByDate[day],
+        selectedTaskIds: dayTasks.map((task) => task.task_id),
+        taskDate: dayTasks[0]?.task_date || null,
       },
     });
   };
@@ -146,22 +195,18 @@ export default function BillingCalendar() {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const days = [];
 
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="h-28 rounded-2xl" />);
+    for (let index = 0; index < firstDay; index++) {
+      days.push(<div key={`empty-${index}`} className="h-28 rounded-2xl" />);
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const taskName = tasksByDate[day] || "No activity scheduled";
-      const hasTask = Boolean(tasksByDate[day]);
-
       days.push(
         <CalendarDay
           key={day}
           day={day}
-          hasTask={hasTask}
-          taskName={taskName}
+          tasks={tasksByDate[day] || []}
           handleViewTask={handleViewTask}
-        />,
+        />
       );
     }
 
@@ -183,6 +228,9 @@ export default function BillingCalendar() {
             <h2 className="text-xl font-semibold text-slate-900 md:text-2xl">
               {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
             </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Track scheduled tasks directly from your calendar.
+            </p>
           </div>
 
           <button
@@ -193,16 +241,103 @@ export default function BillingCalendar() {
           </button>
         </div>
 
-        <div className="mb-3 grid grid-cols-7 gap-2 text-center text-sm font-semibold text-slate-500">
-          {weekDays.map((day) => (
-            <div key={day} className="py-2">
-              {day}
+        {isFetching ? (
+          <div className="flex min-h-[320px] items-center justify-center gap-3 text-sm font-medium text-[#5b53d6]">
+            <Loader2 size={18} className="animate-spin" />
+            Loading tasks...
+          </div>
+        ) : error ? (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+            {error}
+          </div>
+        ) : (
+          <>
+            <div className="mb-3 grid grid-cols-7 gap-2 text-center text-sm font-semibold text-slate-500">
+              {weekDays.map((day) => (
+                <div key={day} className="py-2">
+                  {day}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="grid grid-cols-7 gap-2">{renderCalendar()}</div>
+            <div className="grid grid-cols-7 gap-2">{renderCalendar()}</div>
+          </>
+        )}
       </div>
     </div>
   );
+}
+
+function normalizeTask(task) {
+  return {
+    task_id: task.task_id || task.taskId || task.id || "",
+    title: task.title || "",
+    description: task.description || "No description provided",
+    task_date: formatDateForInput(task.task_date || task.taskDate || ""),
+    status: normalizeTaskStatus(task.status),
+    priority: normalizeTaskPriority(task.priority),
+    vendorId: task.vendorId || "",
+    case_id: task.case_id || task.caseId || "",
+    createdAt: task.createdAt,
+    updatedAt: task.updatedAt,
+  };
+}
+
+function normalizeTaskStatus(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "in progress" || normalized === "in_progress") {
+    return "in_progress";
+  }
+
+  if (normalized === "complete" || normalized === "completed") {
+    return "completed";
+  }
+
+  if (normalized === "review") {
+    return "review";
+  }
+
+  return "upcoming";
+}
+
+function normalizeTaskPriority(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (["urgent", "high", "medium", "low"].includes(normalized)) {
+    return normalized;
+  }
+
+  return "medium";
+}
+
+function formatTaskStatus(value) {
+  const labels = {
+    upcoming: "Upcoming",
+    in_progress: "In Progress",
+    review: "Review",
+    completed: "Completed",
+  };
+
+  return labels[value] || "Upcoming";
+}
+
+function formatTaskPriority(value) {
+  const labels = {
+    urgent: "Urgent",
+    high: "High",
+    medium: "Medium",
+    low: "Low",
+  };
+
+  return labels[value] || "Medium";
+}
+
+function formatDateForInput(value) {
+  if (!value) return "";
+
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) return value;
+
+  return parsedDate.toISOString().split("T")[0];
 }

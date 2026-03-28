@@ -13,6 +13,7 @@ import Calender from './dashboard/calender/page'
 import MattersPage from './dashboard/matters/page'
 import AddMatterPage from './dashboard/matters/add/page'
 import TasksPage from './dashboard/tasks/page'
+import AddTaskPage from './dashboard/tasks/add/page'
 import ViewBill from './ViewBill/page'
 import ForgotPassword from './forgotpassword/Email'
 import ResetPassword from './forgotpassword/resetpassword'
@@ -57,6 +58,7 @@ function App() {
             <Route path="matters" element={<MattersPage />} />
             <Route path="matters/add" element={<AddMatterPage />} />
             <Route path="tasks" element={<TasksPage />} />
+            <Route path="tasks/add" element={<AddTaskPage />} />
             <Route path="addBill" element={<AddBill />} />
             <Route path="bill" element={<ViewBill />} />
           </Route>
