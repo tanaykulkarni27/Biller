@@ -23,10 +23,15 @@ const monthNames = [
 function CalendarDay({ day, tasks, handleViewTask }) {
   const [hoverSide, setHoverSide] = useState("right");
   const hasTask = tasks.length > 0;
+  const isCompletedDay = hasTask && tasks.every((task) => task.status === "completed");
   const primaryTaskLabel =
     tasks.length === 0
       ? "No activity scheduled"
-      : tasks.length === 1
+      : isCompletedDay
+        ? tasks.length === 1
+          ? "Completed"
+          : `${tasks.length} completed tasks`
+        : tasks.length === 1
         ? tasks[0].title
         : `${tasks.length} tasks scheduled`;
 
@@ -45,7 +50,9 @@ function CalendarDay({ day, tasks, handleViewTask }) {
     <div
       onMouseEnter={handleMouseEnter}
       className={`group relative z-0 flex min-h-28 flex-col overflow-visible rounded-2xl border p-3 shadow-sm transition hover:z-30 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(115,103,240,0.14)] ${
-        hasTask
+        isCompletedDay
+          ? "border-emerald-200 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.10),_transparent_42%),linear-gradient(180deg,#fcfffd_0%,#f3fbf7_45%,#edf8f1_100%)] ring-1 ring-emerald-500/5 hover:border-emerald-300"
+          : hasTask
           ? "border-[#7367f0]/20 bg-[radial-gradient(circle_at_top,_rgba(115,103,240,0.08),_transparent_42%),linear-gradient(180deg,#fcfcff_0%,#f7f8fe_45%,#f2f5fb_100%)] ring-1 ring-[#7367f0]/5 hover:border-[#7367f0]/35"
           : "border-slate-200 bg-white hover:border-slate-300"
       }`}
@@ -53,7 +60,7 @@ function CalendarDay({ day, tasks, handleViewTask }) {
       <div className="flex flex-1 items-center justify-center">
         <span
           className={`text-3xl font-bold leading-none ${
-            hasTask ? "text-[#4f46d8]" : "text-slate-700"
+            isCompletedDay ? "text-emerald-600" : hasTask ? "text-[#4f46d8]" : "text-slate-700"
           }`}
         >
           {day}
@@ -63,12 +70,18 @@ function CalendarDay({ day, tasks, handleViewTask }) {
       <div className="flex justify-end">
         <span
           className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${
-            hasTask
+            isCompletedDay
+              ? "bg-emerald-500 text-white shadow-[0_8px_20px_rgba(16,185,129,0.24)]"
+              : hasTask
               ? "bg-[#7367f0] text-white shadow-[0_8px_20px_rgba(115,103,240,0.28)]"
               : "bg-slate-100 text-slate-500"
           }`}
         >
-          {hasTask ? `${tasks.length} Task${tasks.length > 1 ? "s" : ""}` : "Open"}
+          {isCompletedDay
+            ? "Completed"
+            : hasTask
+              ? `${tasks.length} Task${tasks.length > 1 ? "s" : ""}`
+              : "Open"}
         </span>
       </div>
 
@@ -79,7 +92,7 @@ function CalendarDay({ day, tasks, handleViewTask }) {
         `}
       >
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-          {hasTask ? "Scheduled Work" : "Day Status"}
+          {isCompletedDay ? "Completed Work" : hasTask ? "Scheduled Work" : "Day Status"}
         </p>
 
         <p className="mt-2 text-sm font-semibold text-slate-800">{primaryTaskLabel}</p>
