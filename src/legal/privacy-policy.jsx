@@ -53,6 +53,11 @@ const sections = [
     body:
       "Our encryption is designed to protect stored data from unauthorized access and from being saved as plain text. However, because the application includes controlled decryption logic for authorized operations, we do not claim that the service can never read data under any circumstance. The accurate statement is that access is restricted, authenticated, and protected by encryption and server-side verification.",
   },
+  {
+    title: "Changes To This Policy",
+    body:
+      "We may update or change this Privacy Policy in the future as this software evolves, security practices improve, or legal requirements change. Any updated version will reflect the latest privacy practices followed by this software.",
+  },
 ];
 
 export default function PrivacyPolicy() {
@@ -193,17 +198,18 @@ export default function PrivacyPolicy() {
         <footer className="rounded-2xl border border-gray-200 bg-white px-6 py-5 md:px-8">
           <div className="flex flex-col gap-3 text-sm text-gray-600 md:flex-row md:items-center md:justify-between">
             <p>
-              Questions about privacy or data handling can be raised through
-              your account support channel.
+              For support, use{" "}
+              <a
+                href="mailto:tanaykulkarnibusiness@gmail.com"
+                className="font-medium text-[#7367f0] hover:underline"
+              >
+                Contact Us
+              </a>{" "}
+              for any assistance.
             </p>
-            <div className="flex items-center gap-4">
-              <Link to="/login" className="font-medium text-[#7367f0] hover:underline">
-                Back to Login
-              </Link>
-              <Link to="/signup" className="font-medium text-[#7367f0] hover:underline">
-                Create Account
-              </Link>
-            </div>
+            <Link to={-1} className="font-medium text-[#7367f0] hover:underline">
+              Go back
+            </Link>
           </div>
         </footer>
       </div>

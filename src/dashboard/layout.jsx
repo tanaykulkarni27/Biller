@@ -119,12 +119,20 @@ export default function DashboardLayout() {
         <footer className="border-t border-gray-200 bg-white px-4 py-4 md:px-8">
           <div className="mx-auto flex max-w-7xl flex-col gap-2 text-sm text-gray-600 md:flex-row md:items-center md:justify-between">
             <p>Copyright © {currentYear}. All rights reserved.</p>
-            <Link
-              to="/privacy-policy"
-              className="font-medium text-[#7367f0] transition hover:underline"
-            >
-              Privacy Policy
-            </Link>
+            <div className="flex items-center gap-4">
+              <a
+                href="mailto:tanaykulkarnibusiness@gmail.com"
+                className="font-medium text-[#7367f0] transition hover:underline"
+              >
+                Contact Us
+              </a>
+              <Link
+                to="/privacy-policy"
+                className="font-medium text-[#7367f0] transition hover:underline"
+              >
+                Privacy Policy
+              </Link>
+            </div>
           </div>
         </footer>
       </div>
