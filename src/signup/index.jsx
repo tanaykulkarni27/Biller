@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import aaxios from '@/hooks/aaxios'
 import Loader from '../components/Loader'
+import AuthLegalFooter from '../components/AuthLegalFooter'
 
 
 export default function Signup() {
@@ -149,6 +150,7 @@ export default function Signup() {
             </span>
           </Link>
         </p>
+        <AuthLegalFooter />
       </div>
 
 

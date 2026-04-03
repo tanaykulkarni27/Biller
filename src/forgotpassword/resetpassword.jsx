@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import aaxios from "@/hooks/aaxios";
 import Loader from "../components/Loader";
+import AuthLegalFooter from "../components/AuthLegalFooter";
 
 function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -95,6 +96,7 @@ function ResetPassword() {
         </form>
 
         {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
+        <AuthLegalFooter />
       </div>
 
       {isLoading && <Loader />}

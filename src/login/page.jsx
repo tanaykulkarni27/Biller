@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import aaxios from "@/hooks/aaxios";
 import Loader from "../components/Loader";
+import AuthLegalFooter from "../components/AuthLegalFooter";
 import {storage} from '@/hooks/storage';
 function Login() {
   const [email, setEmail] = useState("");
@@ -146,6 +147,7 @@ function Login() {
             </span>
           </Link>
         </p>
+        <AuthLegalFooter />
       </div>
       {isLoading && <Loader />}
 

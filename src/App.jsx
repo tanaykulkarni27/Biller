@@ -18,6 +18,7 @@ import ViewBill from './ViewBill/page'
 import ForgotPassword from './forgotpassword/Email'
 import ResetPassword from './forgotpassword/resetpassword'
 import Signup from './signup'
+import PrivacyPolicy from './legal/privacy-policy'
 import {storage} from '@/hooks/storage';
 
 const ProtectedRoute = () => {
@@ -46,6 +47,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/signup" element={<Signup />} />
          <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardLayout />} >

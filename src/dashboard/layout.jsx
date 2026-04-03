@@ -9,6 +9,7 @@ import {
   BriefcaseBusiness,
   ListTodo,
   LogOut,
+  Menu,
 } from "lucide-react";
 
 const navItems = [
@@ -101,14 +102,12 @@ export default function DashboardLayout() {
         <header className="flex items-center border-b border-gray-200 bg-white p-4 md:hidden">
           <button
             onClick={() => setOpen(true)}
-            className="text-[#7367f0] font-medium"
+            type="button"
+            aria-label="Open navigation menu"
+            className="rounded-md p-2 text-[#7367f0] transition-colors hover:bg-[#7367f0]/10"
           >
-            ☰
+            <Menu size={22} />
           </button>
-          <span className="ml-4 font-semibold text-gray-700">
-            {/* {client_name} */}
-            Menu
-          </span>
         </header>
 
         {/* Main content */}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import aaxios from "@/hooks/aaxios";
 import Loader from "../components/Loader";
+import AuthLegalFooter from "../components/AuthLegalFooter";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -61,6 +62,7 @@ function ForgotPassword() {
 
         {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
         {message && <p className="text-green-600 text-sm mt-4 text-center">{message}</p>}
+        <AuthLegalFooter />
       </div>
 
       {isLoading && <Loader />}
