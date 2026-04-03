@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {
   Home,
@@ -25,6 +25,7 @@ const navItems = [
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const nav = useNavigate();
+  const currentYear = new Date().getFullYear();
   const logout = () => {
     localStorage.removeItem("token");
     nav("/login");
@@ -114,6 +115,18 @@ export default function DashboardLayout() {
         <main className="min-w-0 flex-1 overflow-y-auto">
           <Outlet />
         </main>
+
+        <footer className="border-t border-gray-200 bg-white px-4 py-4 md:px-8">
+          <div className="mx-auto flex max-w-7xl flex-col gap-2 text-sm text-gray-600 md:flex-row md:items-center md:justify-between">
+            <p>Copyright © {currentYear}. All rights reserved.</p>
+            <Link
+              to="/privacy-policy"
+              className="font-medium text-[#7367f0] transition hover:underline"
+            >
+              Privacy Policy
+            </Link>
+          </div>
+        </footer>
       </div>
     </div>
   );
